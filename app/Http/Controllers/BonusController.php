@@ -68,7 +68,7 @@ class BonusController extends Controller
       $poin->poin = $request->input('poin');
       $poin->save();
 
-      if ($diskon) {
+      if ($poin) {
         $request->session()->flash('alert-success', 'Poin telah berhasil di update');
         return redirect()->back();
       }

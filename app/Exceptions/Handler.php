@@ -6,6 +6,8 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
+use Illuminate\Database\QueryException;
+
 class Handler extends ExceptionHandler
 {
     /**
@@ -44,6 +46,14 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        // if ($e instanceof QueryException) {
+        //     return $dbCode = trim($e->getCode());
+
+        //     $request->session()->flash('danger', 'Data Tidak Bisa Dihapus');
+
+        //     // return redirect()->back();
+        // }
+
         return parent::render($request, $exception);
     }
 

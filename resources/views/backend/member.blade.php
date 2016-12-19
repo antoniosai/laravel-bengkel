@@ -17,28 +17,35 @@
 <table class="table table-stripped table-bordered table-hover" id="member">
   <thead>
     <tr>
-      <th>No</th>
-      <th>Nama Member</th>
-      <th>Poin</th>
-      <th></th>
+      <th style="width: 30px"><center>No</center></th>
+      <th style="width: 290px"><center>Nama Member</center></th>
+      <th><center>Alamat</center></th>
+      <th style="width: 80px"><center>Poin</center></th>
+      <th style="width: 120px"><center>Aksi</center></th>
     </tr>
   </thead>
   <tbody>
     <?php $no = 1; ?>
     @foreach($member as $listMember)
     <tr>
-      <td>{{ $no++ }}</td>
-      <td>{{ $listMember->nama_member }}</td>
+      <td><center>{{ $no++ }}</center></td>
+      <td><center>{{ $listMember->nama_member }}</center></td>
+      <td><center>{{ $listMember->alamat }}</center></td>
       <td>
+        <center>
         @if(!$listMember->poin)
         -
         @else
         {{ $listMember->poin }}
         @endif
-      </td>
+        </center>
+      </td>      
       <td>
-        <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailMember1">Detail Member</button>
-        <a href="#" class="btn btn-danger btn-xs">Hapus</a>
+        <center>
+          <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailMember1"><i class="fa fa-user fa-lg"></i> Detail</button>
+          <a href="#" class="btn btn-danger btn-xs"><i class="fa fa-trash fa-lg"></i> Hapus</a>
+
+        </center>
       </td>
     </tr>
     @endforeach

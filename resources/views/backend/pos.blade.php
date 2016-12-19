@@ -230,21 +230,21 @@ select {
 
 <script>
   function showHint(str) {
-      if (str.length == 0) {
-          document.getElementById("listBarang").innerHTML = "";
-          return;
-      } else {
-          var xmlhttp = new XMLHttpRequest();
-          xmlhttp.onreadystatechange = function() {
-              if (this.readyState == 4 && this.status == 200) {
-                  document.getElementById("listBarang").innerHTML = this.responseText;
-              }
-          }
-
-          var listBarang =
-          xmlhttp.open("GET", "http://localhost:8000/admin/api/barang/search/"+str, true);
-          xmlhttp.send();
+    if (str.length == 0) {
+      document.getElementById("listBarang").innerHTML = "";
+      return;
+    } else {
+      var xmlhttp = new XMLHttpRequest();
+      xmlhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          document.getElementById("listBarang").innerHTML = this.responseText;
+        }
       }
+
+      var listBarang =
+      xmlhttp.open("GET", "http://localhost:8000/admin/api/barang/search/"+str, true);
+      xmlhttp.send();
+    }
   }
 </script>
 

@@ -25,6 +25,7 @@ class PosController extends Controller
   private $diskon;
   private $nota;
   private $poin;
+  private $hargaBarang;
 
   public function dashboard()
   {
@@ -66,22 +67,37 @@ class PosController extends Controller
 
       return redirect()->to('admin/pos/'.$nota.'/'.$member->id);
     }
-    $barang = Barang::where('stok', '!=', 0)
-                    ->get();
+
+    $barang = Barang::where('stok', '!=', 0)->get();
 
     $member = Member::where('nama_member', '!=', 'Guest')->get();
 
     $queryOrder = "SELECT orders.nota_id, barangs.nama_barang, barangs.harga_jual, barangs.id as barang_id, orders.qty, orders.total, orders.id
-    FROM barangs, orders
-    WHERE orders.barang_id = barangs.id
-    AND orders.nota_id = $nota
-    ";
+                   FROM barangs, orders
+                   WHERE orders.barang_id = barangs.id
+                   AND orders.nota_id = $nota";
+
+    // $queryTotalPoin = "
+    //   SELECT poin_temp
+    //   FROM order_temps
+    //   WHERE nota_id = $nota
+    // ";
+
+    $totalPoin = OrderTemp::where('nota_id', $nota)->first();
+
+    $poinotal = 0;
+
+    if ($totalPoin) {
+      $poinTotal = $totalPoin->poin_temp;
+    } else {
+      $poinTotal = 0;
+    }
 
     $this->hitungSubtotal($nota);
 
     $this->setDiskon($this->getSubTotal(), $idMember);
 
-    $this->setPoin($this->getSubTotal(), $idMember);
+    $this->setPoin($poinTotal, $idMember);
 
     $this->hitungGrandTotal($this->getDiskon(), $this->getSubTotal());
 
@@ -172,30 +188,77 @@ class PosController extends Controller
     }
   }
 
+  private function setHarga($member_id, $barang_id)
+  {
+    $member = Member::findOrFail($member_id);
+    $barang = Barang::findOrFail($barang_id);
+
+    $hargaBarang = $barang->harga_khusus;
+
+    if ($member->nama_member != 'Guest'){
+      if ($hargaBarang == null) {
+        return $this->hargaBarang = $barang->harga_jual;
+      } else {
+        return $this->hargaBarang = $hargaBarang;
+      }
+    } else {
+      return $this->hargaBarang = $barang->harga_jual;
+    }
+
+  }
+
+  private function getHarga()
+  {
+    return $this->hargaBarang;
+  }
+
   private function setOrder($idMember, $nota)
   {
     $order = Order::where('nota_id', $nota)->get();
 
+    $total = 0;
+
     foreach ($order as $listOrder) {
+      //
+      $barang = Barang::findOrFail($listOrder->barang_id);
+      //
+      $this->setHarga($idMember, $barang->id);
+
+      $listOrder->total = $listOrder->qty * $this->getHarga();
       $listOrder->member_id = $idMember;
       $listOrder->save();
+
+      $total = $total + $listOrder->total;
     }
 
     $orderTemp = OrderTemp::where('nota_id', '=', $nota)->first();
     $orderTemp->member_id = $idMember;
+    $orderTemp->total = $total;
     $orderTemp->save();
   }
 
   private function unsetOrder($idMember, $nota)
   {
     $order = Order::where('nota_id', $nota)->get();
+
+    $total = 0;
+
     foreach ($order as $listOrder) {
+      $barang = Barang::findOrFail($listOrder->barang_id);
+      //
+      $this->setHarga($idMember, $barang->id);
+
+      $listOrder->total = $listOrder->qty * $this->getHarga();
+
       $listOrder->member_id = $idMember;
       $listOrder->save();
+
+      $total = $total + $listOrder->total;
     }
 
     $orderTemp = OrderTemp::where('nota_id', $nota)->first();
     $orderTemp->member_id = $idMember;
+    $orderTemp->total = $total;
     $orderTemp->save();
   }
 
@@ -228,13 +291,20 @@ class PosController extends Controller
   //Save temporary order. Table: Orders
   public function saveOrder(Request $request)
   {
+    // return $request->all();
+
+
     if ($request->barang_id == null) {
       $request->session()->flash('alert-warning', 'Pilih barang untuk dimasukkan kedalam order');
+      
       return redirect()->back()->withInputs();
     } else if ($request->input('qty') < 1) {
       $request->session()->flash('alert-danger', 'Quantity (qty) tidak boleh kurang dari 1');
+      
       return redirect()->back();
     }
+
+    $this->setHarga($request->input('member_id'), $request->input('barang_id'));
 
     $memberId = $request->input('member_id');
 
@@ -243,8 +313,19 @@ class PosController extends Controller
 
     $barang = Barang::find($request->input('barang_id'));
     $order = Order::where('barang_id', $request->barang_id)
-    ->where('nota_id', $request->nota_id)
-    ->first();
+             ->where('nota_id', $request->nota_id)
+             ->first();
+
+    //////////////////////////////////////
+    //Total Belanja untuk Hitung Diskon //
+    //////////////////////////////////////
+
+    // $penguranganHarga = 0;
+
+    // if ($barang->opsi_tukarpoin == 'yes') {
+      
+    // }
+
     if ($request->input('qty') > $barang->stok) {
       $request->session()->flash('alert-danger', 'Oppps! Quantity melebih stok yang tersedia');
       return redirect()->back()->withInput();
@@ -252,7 +333,7 @@ class PosController extends Controller
 
     if ($order) {
       $order->qty = $order->qty + $request->input('qty');
-      $total = $request->input('qty') * $barang->harga_jual;
+      $total = $request->input('qty') * $this->getHarga();
       $order->total = $order->total + $total;
       $order->save();
 
@@ -281,7 +362,7 @@ class PosController extends Controller
       $order->member_id = $member->id;
       $order->barang_id = $request->input('barang_id');
       $order->qty = $request->input('qty');
-      $order->total = $barang->harga_jual * $request->input('qty');
+      $order->total = $this->getHarga() * $request->input('qty');
       $order->save();
 
       $nota = $request->input('nota_id');
@@ -294,6 +375,7 @@ class PosController extends Controller
       $totalBelanja = 0;
 
       $total = DB::select(DB::raw($totalQuery));
+
       foreach ($total as $listTotal) {
         $totalBelanja = $totalBelanja + $listTotal->total;
       }
@@ -301,16 +383,26 @@ class PosController extends Controller
       $orderTemp = OrderTemp::where('nota_id', $request->input('nota_id'))
       ->first();
 
+      $this->hitungPoin($request->input('member_id'), $request->input('barang_id'), $request->input('qty'), $request->input('nota_id'));
+
+      foreach (Barang::all() as $listBarang) {
+        if ($listBarang->opsi_tukarpoin == 'yes') {
+          return $listBarang;
+        }
+      }
+
       if ($orderTemp) {
         $orderTemp->nota_id = $request->input('nota_id');
         $orderTemp->member_id = $request->input('member_id');
         $orderTemp->total = $totalBelanja;
+        $orderTemp->poin_temp = $this->getPoin();
         $orderTemp->save();
       } else {
         $orderTemp = new OrderTemp;
         $orderTemp->nota_id = $request->input('nota_id');
         $orderTemp->member_id = $request->input('member_id');
         $orderTemp->total = $totalBelanja;
+
         $orderTemp->save();
       }
       //End Hitung OrderTemp
@@ -319,10 +411,51 @@ class PosController extends Controller
 
   }
 
-  public function deleteItem($id)
+  private function hitungPoin($member_id, $barang_id, $qty, $nota)
   {
-    $order = Order::findOrFail($id);
+    $this->setHarga($member_id, $barang_id);
+
+    $barang = Barang::findOrFail($barang_id);
+    $member = Member::findOrFail($member_id);
+    $poin = Poin::all();
+
+    $totalPoin = OrderTemp::where('nota_id', $nota)->first();
+
+    $poinotal = 0;
+
+    if ($totalPoin) {
+      if (!$barang->opsi_tukarpoin == 'yes') {
+        return $this->poin = $totalPoin->poin_temp + $totalBelanja;
+      } else {
+        if ($member->nama_member == 'Guest') {
+          return $this->poin = $totalPoin->poin_temp + $this->getHarga() * $qty;
+        } else {
+          return $this->poin = $totalPoin->poin_temp + $this->getHarga() * $qty;
+        }
+      }
+    } else {
+      $poinTotal = 0;
+    }
+
+  }
+
+  public function deleteItem($order_id, $barang_id)
+  {
+    $order = Order::where('nota_id', $order_id)
+                  ->where('barang_id', $barang_id)
+                  ->first();
+    
+    $penguranganHarga = $order->total;
+
+    $orderTemp = OrderTemp::where('nota_id', $order_id)->first();
+    $orderTemp->total = $orderTemp->total - $penguranganHarga;
+    $orderTemp->save();
+
     $order->delete();
+
+    if ($orderTemp->total == 0) {
+      $orderTemp->delete();
+    }
 
     if($order)
     {
@@ -344,18 +477,29 @@ class PosController extends Controller
 
   public function updateQty(Request $request)
   {
+    // return $request->all();
+
     if ($request->input('qty') < 1) {
       $request->session()->flash('alert-danger', 'Quantity (qty) tidak boleh kurang dari 1');
       return redirect()->back();
     }
 
+    $this->setHarga($request->input('member_id'), $request->input('barang_id'));
+
     $barangId = $request->input('barang_id');
     $barang = Barang::findOrFail($barangId);
-    $order = Order::findOrFail($request->input('id'));
 
+    $order = Order::findOrFail($request->input('id'));
     $order->qty = $request->input('qty');
-    $order->total = $barang->harga_jual * $request->input('qty');
+    $order->total = $this->getHarga() * $request->input('qty');
     $order->save();
+
+    $this->hitungPoin($request->input('member_id'), $request->input('barang_id'), $request->input('qty'), $request->input('nota'));
+
+    $orderTemp = OrderTemp::where('nota_id', $request->input('nota'))->first();
+    $orderTemp->total = $orderTemp->total - $this->getHarga();
+    $orderTemp->save();
+
     if($order)
     {
       return redirect()->back();

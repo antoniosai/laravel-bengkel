@@ -15,58 +15,24 @@
 @include('partials.warning')
 
 <div class="row">
-  <div class="col-md-6">
-    <h3>Diskon
-      <div class="pull-right">
-        <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#tambahDiskon">Tambah Diskon</button>
-      </div>
-    </h3>
-    <hr>
-    <table class="table table-stripped table-bordered table-hover">
-      <thead>
-        <tr>
-          <th>Jika Belanja Lebih</th>
-          <th>Diskon</th>
-          <th>Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        @if(count($diskon) == 0)
-          <tr>
-            <td colspan="3"><center><h3>Belum Konfigurasi Diskon</h3></center></td>
-          </tr>
-        @else
-          @foreach($diskon as $listDiskon)
-          <tr>
-            <td>Rp {{ number_format($listDiskon->harga_belanja) }}</td>
-            <td>{{ $listDiskon->diskon }}%</td>
-            <td>
-              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailDiskon{{$listDiskon->id}}">Edit</button>
-              <a href="{{ route('delete.diskon', $listDiskon->id) }}" class="btn btn-danger btn-xs">Hapus</a>
-            </td>
-          </tr>
-          @endforeach
-        @endif
-      </tbody>
-    </table>
-
-  </div>
-  <div class="col-md-6">
+  <div class="col-md-12">
     <h3>Poin
       <div class="pull-right">
         <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#tambahPoin">Tambah Poin</button>
       </div>
     </h3>
     <hr>
-    <table class="table table-stripped table-bordered table-hover">
+    <table class="table table-striped table-bordered table-hover">
       <thead>
         <tr>
-          <th>Jika Belanja Lebih</th>
-          <th>Poin</th>
-          <th>Aksi</th>
+          <th><center>Level</center></th>
+          <th><center>Jika Belanja Lebih</center></th>
+          <th><center>Poin</center></th>
+          <th><center>Aksi</center></th>
         </tr>
       </thead>
       <tbody>
+        <?php $no = 1; ?>
         @if(count($poin) == 0)
           <tr>
             <td colspan="3"><center><h3>Belum Konfigurasi Poin</h3></center></td>
@@ -74,11 +40,14 @@
         @else
           @foreach($poin as $listPoin)
           <tr>
-            <td>Rp {{ number_format($listPoin->harga_belanja) }}</td>
-            <td>+{{ $listPoin->poin }}</td>
+            <td><center>Level {{ $no++ }}</center></td>
+            <td><center>Rp {{ number_format($listPoin->harga_belanja) }}</center></td>
+            <td><center>+{{ $listPoin->poin }}</center></td>
             <td>
-              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailPoin{{$listPoin->id}}">Edit</button>
-              <a href="{{ route('delete.poin', $listPoin->id) }}" class="btn btn-danger btn-xs">Hapus</a>
+              <center>
+                <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailPoin{{$listPoin->id}}"><i class="fa fa-pencil fa-lg"></i></button>
+              <a href="{{ route('delete.poin', $listPoin->id) }}" class="btn btn-danger btn-xs"><i class="fa fa-trash fa-lg"></i></a>
+              </center>
             </td>
           </tr>
           @endforeach
@@ -135,7 +104,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
-        <h4 class="modal-title">Tambah Poin</h4>
+        <h4 class="modal-title">Tambah Poinss</h4>
       </div>
       <div class="modal-body">
         <form action="{{ action('BonusController@postSavePoin')}}" method="post">
@@ -149,8 +118,8 @@
             </div>
           </div>
           <div class="form-group">
-            <label>Poins</label>
-            <input type="text" name="diskon" placeholder="Masukan Poin" value="{{ $listPoin->poin }}" class="form-control">
+            <label>Poin</label>
+            <input type="text" name="poin" placeholder="Masukan Poin" value="{{ $listPoin->poin }}" class="form-control">
           </div>
           <div class="form-group">
             <button type="submit" class="btn btn-info">Simpan Poin</button>

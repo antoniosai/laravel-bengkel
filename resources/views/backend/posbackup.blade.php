@@ -141,8 +141,10 @@ Point of Sales
                   <div class="form-group">
                     <form class="" action="{{ action('PosController@updateQty') }}" method="post">
                       {{ csrf_field() }}
+                      <input type="hidden" name="member_id" value="{{ $member_id }}">
                       <input type="hidden" name="barang_id" value="{{ $item->barang_id }}">
                       <input type="hidden" name="id" value="{{ $item->id }}">
+                      <input type="hidden" name="nota" value="{{ $nota }}">
                       <input v-model="qty" type="number" name="qty" value="{{ $item->qty }}" style="width: 40px">
 
                   </div>
@@ -156,7 +158,7 @@ Point of Sales
                 <td style="width: 130px">
                     <button type="submit" class="btn btn-xs btn-info">Update</button>
                   </form>
-                  <a href="{{ route('order.delete', $item->id ) }}" class="btn btn-xs btn-warning">Delete</a>
+                  <a href="{{ route('order.delete', [$item->nota_id, $item->barang_id] ) }}" class="btn btn-xs btn-warning">Delete</a>
                 </td>
               </tr>
             @endforeach
@@ -198,7 +200,7 @@ Point of Sales
                 <input type="hidden" name="qty[]" value="{{ $listOrder->qty }}">
                 <input type="hidden" name="barang_id[]" value="{{ $listOrder->barang_id }}">
                 <input type="hidden" name="total[]" value="{{ $listOrder->total}}">
-                <?php $grandTotal = $grandTotal + $listOrder->total ?>
+                <?php $grandTotal = $grandTotal + $listOrder->total; ?>
               @endforeach
               <input type="hidden" name="diskon" value="{{ $diskon }}">
               <input type="hidden" name="grand_total" value="{{ $grandTotal }}">

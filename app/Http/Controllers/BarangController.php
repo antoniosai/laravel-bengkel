@@ -9,12 +9,18 @@ use Illuminate\Support\Facades\DB;
 use App\Barang;
 use App\BarangMasuk;
 
+use App\Order;
+use App\OrderTemp;
+use App\Tranksaksi;
+
+use Excel; 
+
 class BarangController extends Controller
 {
     //Api
     public function apiAllBarang()
     {
-      $barang = Barang::all();
+      $barang = Barang::select('harga', 'harga_jual', 'harga_khusus', 'nama_barang', 'stok', 'opsi_tukarpoin')->get();
       return response()->json($barang);
     }
 
@@ -25,7 +31,7 @@ class BarangController extends Controller
 
     public function getAddBarang()
     {
-      $barang = Barang::all();
+      $barang = Barang::select('id', 'harga', 'harga_jual', 'harga_khusus', 'nama_barang', 'bobot_poin' ,'stok', 'opsi_tukarpoin')->get();
 
       return view('backend.barang', [
         'barang' => $barang
@@ -34,7 +40,40 @@ class BarangController extends Controller
 
     public function importBarang(Request $request)
     {
-      return $request->all();
+      $importExcel = Excel::load($request->file('excel'), function($reader){
+        $reader->each(function($sheet){
+          Barang::create($sheet->toArray());
+        });
+      });
+
+      // return $request->all();
+      if ($importExcel) {
+        $request->session()->flash('success', 'Berhasil mengimport barang dari file Excel');
+        return redirect()->back();
+      }
+    }
+
+    public function generateExcelTemplate()
+    {
+
+      Excel::create('Template Import Buku', function($excel) {
+      // Set the properties
+        $excel->setTitle('Template Import Barang')
+          ->setCreator('Area Motor')
+          ->setCompany('Area Motor')
+          ->setDescription('Import Barang');
+          $excel->sheet('Data Barang', function($sheet) {
+            $row = 1;
+            $sheet->row($row, [
+            'nama_barang',
+            'stok',
+            'harga',
+            'harga_jual',
+            'harga_khusus',
+            'bobot_poin'
+          ]);
+        });
+      })->export('xlsx');
     }
 
     public function postAddBarang(Request $request)
@@ -88,11 +127,15 @@ class BarangController extends Controller
 
     public function deleteBarang($id)
     {
+      $this->checkItemOrderTemp($id);
+
       $barang = Barang::findOrFail($id);
       $barang->delete();
 
       if ($barang) {
         return redirect()->back()->with('successMessage', 'Barang berhasil dihapus');
+      } else {
+        return redirect()->back()->with('errorMessage', 'Barang tidak bisa dihapus');
       }
     }
 
@@ -112,6 +155,22 @@ class BarangController extends Controller
         $request->session()->flash('alert-success', 'Stok berhasil ditambahkan');
         return redirect()->back();
       }
+    }
+
+    private function checkItemOrderTemp($barang_id)
+    {
+      $barang = Barang::findOrFail($barang_id);
+
+      if (Order::where('barang_id', $barang->id)->first()) {
+
+        return redirect()->back()->with('errorMessage', 'Barang Tidak Bisa Dihapus Karena Sedang Di Order');
+      }
+
+      if (Tranksaksi::where('barang_id', $barang->id)->first()) {
+
+        return redirect()->back()->with('errorMessage', 'Barang Tidak Bisa Dihapus Karena Sedang Di Order');
+      }
+
     }
 
 }

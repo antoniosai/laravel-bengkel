@@ -41,7 +41,7 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
     ]);
     Route::post('order', 'PosController@saveOrder');
 
-    Route::get('order/delete/{id}', [
+    Route::get('order/delete/{orderid}/{barangid}', [
       'as' => 'order.delete',
       'uses' => 'PosController@deleteItem'
     ]);
@@ -71,6 +71,8 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
       'as' => 'barang.delete',
       'uses' => 'BarangController@deleteBarang'
     ]);
+
+    Route::get('generate/excel', 'BarangController@generateExcelTemplate');
 
     Route::post('import/barang', 'BarangController@importBarang');
   });
@@ -156,9 +158,15 @@ Route::group(['prefix' => 'export'], function () {
 //=================== TEST AREA =====================//
 Route::group(['prefix' => 'test'], function(){
 
-  Route::post('submit', function(){
-    return $_POST['topics'];
+  Route::get('submit', function(){
+    return $barang = App\Barang::all();
+    foreach ($barang as $listBarang) {
+      if ($listBarang->opsi_tukarpoin == 'yes') {
+        return $listBarang;
+      }
+    }
   });
+
   Route::get('detailmember', function()
   {
     $poin = App\Poin::all()->sortByDesc('harga_belanja');
@@ -179,27 +187,23 @@ Route::group(['prefix' => 'test'], function(){
     'uses' => 'TestController@test'
   ]);
 
-  Route::get('testonly', function(){
-    //Barang terkecuali Ban dan Oli
 
-    $barang_id = [1,2,3];
-    $qty = [1,3,1];
+  Route::get('repeat-until', function(){
+    $member = App\Member::findOrFail(1);
+    $barang = App\Barang::findOrFail(6);
 
-    $count = count($barang_id);
+    $hargaBarang = $barang->harga_khusus;
 
-    $penguranganTotalBelanja = 0;
 
-    $queryBarangTerkecuali = App\Barang::where('nama_barang', 'LIKE', '%oli%')->get();
-
-    foreach ($queryBarangTerkecuali as $barang) {
-      if ($barang->nama_barang === 'oli') {
-        echo "tidak identik";
-        // $penguranganTotalBelanja =  50000 - ($barang->harga_jual * $qty[$i]);
+    if ($member->nama_member != 'Guest'){
+      if ($hargaBarang == null) {
+        echo $hargaBarang = $barang->harga_jual;
       } else {
-        return $barang->nama_barang;
+        echo $hargaBarang = $hargaBarang;
       }
+    } else {
+      echo $hargaBarang = $barang->harga_jual;
     }
-    // return $penguranganTotalBelanja;
   });
 });
 //=================== TEST AREA =====================//

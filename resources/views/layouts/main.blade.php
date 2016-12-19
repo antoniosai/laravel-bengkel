@@ -4,8 +4,6 @@
     <meta charset="utf-8">
     <title>@yield('title')</title>
 
-    <link href="{{ asset('css/font-awesome.min.css') }}" rel='stylesheet' type='text/css'>
-
     <?php $toko = App\Toko::all()->first(); ?>
 
     <link href="{{ asset('css/'.$toko->tema) }}" rel="stylesheet">
@@ -17,7 +15,8 @@
 
     <link rel="icon" href="{{ asset('images/motor.png')}}">
 
-    <link href="{{ asset('css/font-awesome.min.css') }}" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="{{ asset('font-awesome-4.7.0/css/font-awesome.min.css') }}">
+    {{-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> --}}
 
 
     <script type="text/javascript" src="{{ asset('js/jquery.dataTables.min.js') }}"></script>

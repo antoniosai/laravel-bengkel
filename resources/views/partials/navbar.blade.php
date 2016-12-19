@@ -10,7 +10,6 @@
       <li><a href="{{ action('BarangController@getAddBarang') }}">Barang</a></li>
       <li><a href="{{ action('BonusController@index') }}">Managemen Poin</a></li>
       <li><a href="{{ action('UserController@index') }}">User & Role</a></li>
-      @can('can.laporan')
       <li class="dropdown">
         <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Laporan <span class="caret"></span></a>
         <ul class="dropdown-menu">
@@ -23,7 +22,6 @@
           <li><a href="{{ action('ReportController@user') }}">User</a></li>
         </ul>
       </li>
-      @endcan
     </ul>
     <ul class="nav navbar-nav navbar-right">
       <li><a href="#"><marquee><b>Tanggal : {{ date('d M Y') }}</b></marquee></a></li>

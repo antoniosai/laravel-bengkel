@@ -18,21 +18,25 @@
 <table class="table table-bordered table-stripped table-hover" id="barang">
   <thead>
     <tr>
-      <th>Nama Barang</th>
-      <th><center>Stok</center></th>
-      <th><center>Harga</center></th>
-      <th><center>Harga Umum</center></th>
-      <th><center>Harga Khusus</center></th>
-      <th>Bobot Poin</th>
-      <th>Aksi</th>
+      <th><center>No<br>&nbsp;</center></th>
+      <th style="width: 200px"><center>Nama Barang<br>&nbsp;</center></th>
+      <th><center>Stok<br>&nbsp;</center></th>
+      <th><center>Harga<br>Pokok</center></th>
+      <th><center>Harga<br>Umum</center></th>
+      <th><center>Harga<br>Khusus</center></th>
+      <th><center>Bobot<br>Poin</center></th>
+      <th><center>Opsi<br>Tukar Poin</center></th>
+      <th style="width: 90px"><center>Aksi<br>&nbsp;</center></th>
     </tr>
   </thead>
   <tbody>
+    <?php $no = 1; ?>
     @foreach($barang as $listBarang)
     <tr>
+      <td><center>{{ $no++ }}</center></td>
       <td>{{ $listBarang->nama_barang }}</td>
       <td><center>{{ $listBarang->stok }}</center></td>
-      <td>Rp. {{ number_format($listBarang->harga) }}</td>
+      <td><center>Rp. {{ number_format($listBarang->harga) }}</center></td>
       <td><center>Rp. {{ number_format($listBarang->harga_jual) }}</center></td>
       <td>
         @if($listBarang->harga_khusus == null)
@@ -43,9 +47,26 @@
       </td>
       <td style="text-align: center">{{ $listBarang->bobot_poin }}</td>
       <td>
-        <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#stokBarang{{$listBarang->id}}">Tambah Stok</button>
-        <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#editBarang{{$listBarang->id}}">Edit Barang</button>
-        <a href="{{ route('barang.delete', $listBarang->id) }}" class="btn btn-danger btn-xs">Hapus</a>
+        @if($listBarang->opsi_tukarpoin == 'yes')
+          <?php
+            $spanClass = 'success';
+            $name = 'Yes';
+          ?>
+        @else
+          <?php
+            $spanClass = 'danger';
+            $name = 'No';
+          ?>
+        @endif
+        <center><span class="label label-{{ $spanClass }}">{{ $name }}</span></center>
+      </td>
+      <td>
+        <center>
+          <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#stokBarang{{$listBarang->id}}"><i class="fa fa-plus fa-lg"></i></button>
+        <button type="button" class="btn btn-info btn-xs" data-toggle="modal" data-target="#editBarang{{$listBarang->id}}"><i class="fa fa-pencil fa-lg"></i></button>
+        <a href="{{ route('barang.delete', [$listBarang->id]) }}" class="btn btn-danger btn-xs"><i class="fa fa-trash fa-lg"></i></a>
+
+        </center>
       </td>
     </tr>
     @endforeach
@@ -112,11 +133,11 @@
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title">Import From Excel
-          <a href="#" class="btn btn-xs btn-info">Download Template Terbaru</a>
+          <a href="{{ action('BarangController@generateExcelTemplate') }}" class="btn btn-xs btn-info">Download Template Terbaru</a>
         </h4>
       </div>
       <div class="modal-body">
-        <form action="{{ action('BarangController@importBarang')}}" method="post">
+        <form action="{{ action('BarangController@importBarang')}}" method="post" enctype="multipart/form-data">
           {{ csrf_field() }}
           <div class="form-group">
             <label>Pilih File</label>
