@@ -28,12 +28,11 @@ Laporan Barang
         <br>
         <table class="table table-hover" id="barangMasuk">
           <thead>
-            <tr>
+            <tr class="info">
               <th>No</th>
               <th>Nama Barang</th>
               <th>Stok Masuk</th>
               <th>Tanggal</th>
-              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -44,9 +43,6 @@ Laporan Barang
               <td>{{ $listBarang->nama_barang }}</td>
               <td>+{{ $listBarang->stok_masuk }}</td>
               <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listBarang->created_at) }}</td>
-              <td>
-                <a href="#" class="btn btn-xs btn-info">Detail</a>
-              </td>
             </tr>
             @endforeach
           </tbody>
@@ -60,31 +56,24 @@ Laporan Barang
           </div>
         </h3>
         <br>
-        <table class="table table-hover" id="barangKeluar">
+        <table class="table table-hover table-striped table-bordered" id="barangKeluar">
           <thead>
-            <tr>
-              <th>No</th>
-              <th>Member</th>
-              <th>Nama Barang</th>
-              <th>Stok Keluar</th>
-              <th>Jenis Tranksaksi</th>
-              <th>Tanggal</th>
-              <th></th>
+            <tr class="info">
+              <th style="width: 250px"><center>Tanggal</center></th>
+              <th><center>Member</center></th>
+              <th><center>Nama Barang</center></th>
+              <th style="width: 40px"><center>Stok Keluar</center></th>
+              <th style="width: 150px"><center>Jenis Tranksaksi</center></th>
             </tr>
           </thead>
           <tbody>
-            <?php $no = 1 ?>
             @foreach($barangKeluar as $listBarang)
             <tr>
-              <td>{{ $no++ }}</td>
-              <td>{{ $listBarang->nama_member }}</td>
-              <td>{{ $listBarang->nama_barang }}</td>
-              <td>-{{ $listBarang->stok_keluar }}</td>
-              <td>{{ $listBarang->tranksaksi }}</td>
-              <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listBarang->created_at) }}</td>
-              <td>
-                <a href="#" class="btn btn-xs btn-info">Detail</a>
-              </td>
+              <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesiaWithSecond($listBarang->created_at) }}</center></td>
+              <td><center>{{ $listBarang->nama_member }}</center></td>
+              <td><center>{{ $listBarang->nama_barang }}</center></td>
+              <td><center>-{{ $listBarang->stok_keluar }}</center></td>
+              <td><center>{{ $listBarang->tranksaksi }}</center></td>
             </tr>
             @endforeach
           </tbody>

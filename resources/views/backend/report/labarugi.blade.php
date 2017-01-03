@@ -11,72 +11,108 @@ Laporan Laba Rugi
 @section('content')
 @include('partials.navbar')
 @include('partials.alert')
+
+<?php 
+  $stringHeader = "Laporan Laba Rugi" 
+?>
+
+@if(!$bulan == null && !$tahun == null)
+  <?php
+    foreach($listBulan as $key => $value){
+      if ($bulan == $key) {
+        $stringBulan = $value;
+      }
+      // <option value="{{ $key }}">{{ $value }}</option>
+    }
+
+    $stringHeader .= " - Bulan : " . $stringBulan . ' ' . $tahun; 
+  ?>
+@else
+
+@endif
+
 <div class="well">
   <div class="row">
-    <div class="col-md-3">
-      <h3>Laporan Laba Rugi</h3>
+    <div class="col-md-6">
+      <h3>{{ $stringHeader }} <small><a href="#" title="Laporan Laba Rugi" data-toggle="popover" data-trigger="focus" data-content="Halaman untuk menampilkan laporan laba rugi (bulanan)"><i class="fa fa-question-circle fa-lg"></i></a></small></h3>
     </div>
-    <div class="col-md-9" style="margin-top: 10px">
-        <form class="form-inline pull-right" action="index.html" method="post">
+    <div class="col-md-6" style="margin-top: 10px">
+      <div class="pull-right">
+        <form class="form-inline pull-right" action="{{ action('ReportController@postLabaRugi')}}" method="post">
+          {{ csrf_field() }}
+            <select class="form-control" name="bulan">
+              @foreach($listBulan as $key => $value)
+                <?php $option = ''; ?>
+                @if(date('M') == $key)
+                  <?php $option = 'selected="selected"'; ?>
+                @endif
+                <option value="{{ $key }}" {{ $option }}>{{ $value }}</option>
+              @endforeach
+            </select>
 
-        <select class="form-control" name="bulan">
-          <option value="1">Januari</option>
-          <option value="2">Februari</option>
-          <option value="3">Maret</option>
-          <option value="4">April</option>
-          <option value="5">Mei</option>
-          <option value="6">Juni</option>
-          <option value="7">Juli</option>
-          <option value="8">Agustus</option>
-          <option value="9">September</option>
-          <option value="10">Oktober</option>
-          <option value="11">November</option>
-          <option value="12">Desember</option>
-        </select>
-
-        <select class="form-control" name="bulan">
-          <option value="1">2016</option>
-        </select>
-      <button type="submit" class="btn btn-success">Sort</button>
-
-      </form>
+            <select class="form-control" name="tahun">
+              @foreach($listTahun as $value)
+                <?php $option = ''; ?>
+                @if(date('Y') == $value)
+                  <?php $option = 'selected="selected"'; ?>
+                @endif
+                <option value="{{ $value }}" {{ $option }}>{{ $value }}</option>
+              @endforeach
+            </select>
+            <button type="submit" class="btn btn-success" name="report" value="filter">Filter</button>
+            <a href="{{ action('ReportController@labaRugi')}}" class="btn btn-info">Hapus Filter</a>
+            <button type="submit" class="btn btn-primary" name="report" value="export">Cetak PDF</button>
+          </form>
+      </div>
     </div>
   </div>
 </div>
-<h2>Bulan Januari 2016
-  <div class="pull-right">
-    <a href="#" class="btn btn-primary">Cetak PDF</a>
-  </div>
-</h2>
-<hr>
-<table class="table table-bordered table-hover">
+
+<table class="table table-bordered table-striped table-condensed" id="labaRugi">
   <thead>
-    <tr>
-      <th>TANGGAL</th>
-      <th>OMSET</th>
-      <th>MODAL</th>
-      <th>LABA</th>
+    <tr class="info">
+      <th style="width: 15%; text-align: center">TANGGAL</th>
+      <th style="width: 20%; text-align: center">OMSET</th>
+      <th style="width: 20%; text-align: center">MODAL</th>
+      <th style="width: 20%; text-align: center">LABA</th>
     </tr>
   </thead>
   <tbody>
+    <?php 
+      $totalOmset = 0;
+      $totalModal = 0;
+      $totalLaba = 0;
+    ?>
+    @foreach($laba_rugi as $laba)
+    <?php 
+      $labaTotal = $laba->omset - $laba->modal;
+      $totalOmset = $totalOmset + $laba->omset; 
+      $totalModal = $totalModal + $laba->modal;
+      $totalLaba = $totalLaba + $labaTotal;
+
+      $tahun = substr($laba->created_at, 0, 4);
+      $bulan = substr($laba->created_at, 5, 2);
+      $tgl   = substr($laba->created_at, 8, 2);
+
+    ?>
     <tr>
-      <td>12 Januari 2016</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
+      <td style="text-align: center">
+        <a href="{{ route('labarugi.detail', App\Http\Controllers\LibraryController::timeStampToDate($laba->created_at)) }}">{{ App\Http\Controllers\LibraryController::waktuIndonesia($laba->created_at) }}
+        </a>
+      </td>
+      <td style="text-align: center">Rp {{ number_format($laba->omset) }}</td>
+      <td style="text-align: center">Rp {{ number_format($laba->modal) }}</td>
+      <td style="text-align: center">Rp {{ number_format($labaTotal) }}</td>
     </tr>
-    <tr>
-      <td>12 Januari 2016</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
-    </tr>
-    <tr>
-      <td>12 Januari 2016</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
-      <td>Rp {{ number_format(50000) }}</td>
-    </tr>
+    @endforeach
+    <tfoot>
+      <tr class="info">
+        <td><center><strong>TOTAL</strong></center></td>
+        <td><center><strong>Rp {{ number_format($totalOmset) }}</strong></center></td>
+        <td><center><strong>Rp {{ number_format($totalModal) }}</strong></center></td>
+        <td><center><strong>Rp {{ number_format($totalLaba) }}</strong></center></td>
+      </tr>
+    </tfoot>
   </tbody>
 </table>
 <!-- <ul class="nav nav-tabs" id="myTab">
@@ -109,4 +145,11 @@ $(document).ready(function() {
   $('#labaRugi').DataTable();
   });
 </script>
+
+<script>
+$(document).ready(function(){
+    $('[data-toggle="popover"]').popover();   
+});
+</script>
+
 @endsection

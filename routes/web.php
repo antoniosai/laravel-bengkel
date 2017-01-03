@@ -83,19 +83,88 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   Route::group(['prefix' => 'member'], function(){
     Route::get('/', 'MemberController@index');
     Route::post('add', 'MemberController@postAddMember');
+    Route::post('edit', 'MemberController@postEditMember');
+
+    Route::get('delete/{id}', [
+      'as' => 'member.delete',
+      'uses' => 'MemberController@deleteMember'
+    ]);
   });
   //=================== MEMBER =====================//
 
   //=================== REPORT =====================//
   Route::group(['prefix' => 'report'], function(){
     Route::get('/', 'ReportController@index');
-    Route::get('sales', 'ReportController@sales');
-    Route::get('member', 'ReportController@member');
-    Route::get('barang', 'ReportController@barang');
-    Route::get('user', 'ReportController@user');
 
-    Route::get('labarugi', 'ReportController@labaRugi');
-    // Route::get('labarugi/{bulan}/{tahun}', 'ReportController@labaRugi');
+    //Sales
+    Route::group(['prefix' => 'sales'], function(){
+      Route::get('/', 'ReportController@sales');
+      Route::post('/', 'ReportController@postSales');
+      Route::get('/{bulan}/{tahun}', 'ReportController@salesByDate');
+    });
+    //End Sales
+
+    //Member
+    Route::group(['prefix' => 'member'], function(){
+      
+      Route::get('/', 'ReportController@member');
+
+      Route::get('{id}', [
+        'as' => 'report.member',
+        'uses' => 'ReportController@memberById'
+      ]);
+
+    });
+    //End Member
+    
+    //Barang
+    Route::group(['prefix' => 'barang'], function(){
+      Route::get('/', 'ReportController@barang');
+      Route::get('{bulan}/{tahun}', [
+        'as' => 'barang.date',
+        'uses' => 'ReportController@barangByDate'
+      ]);
+    });
+    //End Barang
+    
+    //User
+    Route::group(['prefix' => 'user'], function(){
+      Route::get('/', 'ReportController@user');
+      Route::get('/{id}', [
+        'as' => 'report.user.byid',
+        'uses' => 'ReportController@userById'
+      ]);
+    });
+    //End User
+
+    //Laba Rugi
+    Route::group(['prefix' => 'labarugi'], function(){
+      Route::get('/', 'ReportController@labaRugi');
+      // Route::get('labarugi', 'ReportController@labaRugiByDate');
+      // Route::get('labarugi/{bulan}/{tahun}', [
+      //   'as' => 'labarugi.short',
+      //   'uses' => 'ReportController@labaRugi'
+      // ]);
+      Route::get('/{bulan}/{tahun}', 'ReportController@labaRugiByDate');
+
+      Route::get('{created_at}', [
+        'as' => 'labarugi.detail',
+        'uses'=> 'ReportController@labaRugiDetail'
+      ]);
+      
+      Route::get('{tanggal}/{bulan}/{tahun}', 'ReportController@labaRugiBySingleDate');
+      
+      Route::post('/', 'ReportController@postLabaRugi');
+    });
+    //End Laba Rugi
+
+    // Start of Report Penukaran Poin
+    Route::group(['prefix' => 'penukaran_poin'], function(){
+      Route::get('/', 'ReportController@penukaranPoin');
+      Route::get('{bulan}/{tahun}', 'ReportController@penukaranPoinByDate');
+      Route::post('/', 'ReportController@postPenukaranPoin');
+    });
+    // End of Report Penukaran Poin
 
   });
   //=================== REPORT =====================//
@@ -103,8 +172,7 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   //=================== BONUS =====================//
   Route::group(['prefix' => 'bonus'], function(){
     Route::get('/', 'BonusController@index');
-    Route::post('bonus/diskon/add', 'BonusController@postAddDiskon');
-    Route::post('bonus/diskon/save', 'BonusController@postSaveDiskon');
+    Route::post('bonus/add/hadiah', 'BonusController@postAddHadiah');
     Route::post('bonus/poin/add', 'BonusController@postAddPoin');
     Route::post('bonus/poin/save', 'BonusController@postSavePoin');
 
@@ -149,8 +217,47 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
 
 //=================== EXPORT =====================//
 Route::group(['prefix' => 'export'], function () {
+
+  Route::group(['prefix' => 'labarugi'], function () {
+    
+    Route::get('{bulan}/{tahun}', [
+      'as' => 'laba_rugi.pdf',
+      'uses' => 'ExportController@labaRugiToPdf'
+    ]);
+
+    Route::get('{date}', [
+      'as' => 'laba_rugi_detail.pdf',
+      'uses' => 'ExportController@labaRugiDetailToPdf'
+    ]);
+
+  });
+
   Route::group(['prefix' => 'barang'], function () {
-    Route::get('barangmasuk', 'ExportController@barangMasukToPdf');
+    
+    Route::get('barangmasuk', [
+      'as' => 'barang_masuk.pdf',
+      'uses' => 'ExportController@barangMasukToPdf'
+    ]);
+
+  });
+
+  Route::group(['prefix' => 'penukaran_poin'], function(){
+    Route::get('{bulan}/{tahun}', [
+      'as' => 'penukaran_poin.pdf',
+      'uses' => 'ExportController@penukaranPoinToPdf'
+    ]);
+  });
+
+  Route::group(['prefix' => 'penjualan'], function(){
+    Route::get('{bulan}/{tahun}', [
+      'as' => 'penjualan.pdf',
+      'uses' => 'ExportController@penjualanToPdf'
+    ]);
+
+    Route::get('{nota}', [
+      'as' => 'nota.pdf',
+      'uses' => 'ExportController@fakturToPdf'
+    ]);
   });
 });
 //=================== EXPORT =====================//
@@ -159,25 +266,29 @@ Route::group(['prefix' => 'export'], function () {
 Route::group(['prefix' => 'test'], function(){
 
   Route::get('submit', function(){
-    return $barang = App\Barang::all();
-    foreach ($barang as $listBarang) {
-      if ($listBarang->opsi_tukarpoin == 'yes') {
-        return $listBarang;
-      }
-    }
+    $thisYear = date('Y');
+    $thisMonth = date('m');
+    $thisDay = date('d');
+
+    $labaRugiQuery = "
+      SELECT *
+      FROM laba_rugis
+      WHERE month(created_at) = $thisMonth
+      AND year(created_at) = $thisYear
+      AND day(created_at) = $thisDay
+    ";
+
+    $labaRugi = App\LabaRugi::whereYear('created_at', $thisYear)
+                        ->whereMonth('created_at', $thisMonth)
+                        ->whereDay('created_at', $thisDay)
+                        ->first();
+
+    return $labaRugi->omset;
   });
 
   Route::get('detailmember', function()
   {
-    $poin = App\Poin::all()->sortByDesc('harga_belanja');
-
-    $belanja = 120000212;
-
-    foreach ($poin as $poinList) {
-      if ($belanja > $poinList->harga_belanja) {
-        return $poinList->poin;
-      }
-    }
+    return $orders_this_month = App\Barang::where( DB::raw('MONTH(created_at)', '=', date('m') ))->get();
   });
 
   Route::get('diskon/{belanja}', 'TestController@setDiskon');
@@ -189,21 +300,38 @@ Route::group(['prefix' => 'test'], function(){
 
 
   Route::get('repeat-until', function(){
-    $member = App\Member::findOrFail(1);
-    $barang = App\Barang::findOrFail(6);
-
-    $hargaBarang = $barang->harga_khusus;
-
-
-    if ($member->nama_member != 'Guest'){
-      if ($hargaBarang == null) {
-        echo $hargaBarang = $barang->harga_jual;
-      } else {
-        echo $hargaBarang = $hargaBarang;
-      }
-    } else {
-      echo $hargaBarang = $barang->harga_jual;
-    }
+    
+    // Basic roles data
+    App\Role::insert([
+        ['name' => 'admin'],
+        ['name' => 'manager'],
+        ['name' => 'editor'],
+    ]);
+ 
+    // Basic permissions data
+    App\Permission::insert([
+        ['name' => 'access.backend'],
+        ['name' => 'create.user'],
+        ['name' => 'edit.user'],
+        ['name' => 'delete.user'],
+        ['name' => 'create.article'],
+        ['name' => 'edit.article'],
+        ['name' => 'delete.article'],
+    ]);
+ 
+    // Add a permission to a role
+    $role = App\Role::where('name', 'admin')->first();
+    $role->addPermission('access.backend');
+    $role->addPermission('create.user');
+    $role->addPermission('edit.user');    
+    $role->addPermission('delete.user');
+    // ... Add other role permission if necessary
+ 
+    // Create a user, and give roles
+    $user = App\User::find(18);
+    $user->assignRole('admin');
+ 
+    // ... Add other user and assign them to roles
   });
 });
 //=================== TEST AREA =====================//

@@ -3,7 +3,6 @@
   <head>
     <meta charset="utf-8">
     <title>@yield('title')</title>
-
     <?php $toko = App\Toko::all()->first(); ?>
 
     <link href="{{ asset('css/'.$toko->tema) }}" rel="stylesheet">
@@ -28,14 +27,36 @@
       height: 28px;
     }
     .navbar {min-height:28px !important;}
+  
+
+    html {
+  position: relative;
+  min-height: 100%;
+}
+body {
+  /* Margin bottom by footer height */
+  margin-bottom: 160px;
+}
+footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  /* Set the fixed height of the footer here */
+  height: 80px;
+  background-color: #f5f5f5;
+}
+
+.nav-button {
+  position: absolute;
+  margin: auto;
+  bottom: 0;
+}
     </style>
     @yield('custom_styles')
   </head>
   <body>
 
-    <div class="container">
-      @yield('content')
-    </div>
+    <div class="container">@yield('content')</div>
 
     <script src="{{ asset('js/app.js') }}"></script>
 
@@ -47,5 +68,20 @@
     <script src="{{ asset('js/app.js') }}"></script>
 
     @yield('custom_scripts')
+    
+    <footer>
+      <div class="container">
+        <p class="text-muted">
+          <center>
+            <strong>{{ $toko->nama_toko }} &copy;{{ date('Y') }}</strong>
+            <br>
+            <span class="fa fa-envelope-o fa-lg"></span> {{ $toko->email }}&nbsp;&nbsp;&nbsp;&nbsp;
+            <span class="fa fa-phone fa-lg"></span> {{ $toko->telepon }}
+            <br>
+            {{ $toko->alamat }}
+          </center>
+        </p>
+      </div>
+    </footer>
   </body>
 </html>

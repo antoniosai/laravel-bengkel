@@ -27,38 +27,14 @@ class User extends Authenticatable
         'password', 'remember_token',
     ];
 
-    public function roles()
+    public function traksaksis()
     {
-        return $this->belongsToMany(Role::class);
+        return $this->hasMany('App\TranksaksiTemp', 'tranksaksi_temps', 'user_id');
     }
 
-    public function hasRole($name)
+    public function tranksaksi()
     {
-        foreach($this->roles as $role) {
-            if ($role->name == $name) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public function assignRole($role)
-    {
-        if (is_string($role)) {
-            $role = Role::where('name', $role)->first();
-        }
-
-        return $this->roles()->attach($role);
-    }
-
-    public function revokeRole($role)
-    {
-        if (is_string($role)) {
-            $role = Role::where('name', $role)->first();
-        }
-
-        return $this->roles()->detach($role);
+        return $this->hasMany('App\Tranksaksi');
     }
 
 }

@@ -15,9 +15,10 @@
         <ul class="dropdown-menu">
           <li><a href="{{ action('ReportController@labaRugi') }}">Laba & Rugi</a></li>
           <li role="separator" class="divider"></li>
-          <li><a href="{{ action('ReportController@sales') }}">Sales</a></li>
+          <li><a href="{{ action('ReportController@sales') }}">Penjualan</a></li>
           <li><a href="{{ action('ReportController@member') }}">Member</a></li>
           <li><a href="{{ action('ReportController@barang') }}">Barang</a></li>
+          <li><a href="{{ action('ReportController@penukaranPoin')}}">Penukaran Poin</a></li>
           <li role="separator" class="divider"></li>
           <li><a href="{{ action('ReportController@user') }}">User</a></li>
         </ul>

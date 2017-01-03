@@ -15,9 +15,12 @@
   </h3>
 </div>
 @include('partials.alert')
+@include('partials.warning')
+@include('partials.validationmessage')
+
 <table class="table table-bordered table-stripped table-hover" id="barang">
   <thead>
-    <tr>
+    <tr class="info">
       <th><center>No<br>&nbsp;</center></th>
       <th style="width: 200px"><center>Nama Barang<br>&nbsp;</center></th>
       <th><center>Stok<br>&nbsp;</center></th>
@@ -90,32 +93,59 @@
           <input type="hidden" name="id" value="{{ $barangs->id }}">
           <div class="form-group">
             <label>Nama Barang</label>
-            <input type="text" name="nama_barang" placeholder="Masukkan Nama Barang" value="{{ $barangs->nama_barang }}" class="form-control">
+            <input type="text" name="nama_barang" value="{{ $barangs->nama_barang }}" placeholder="Masukkan Nama Barang" class="form-control">
           </div>
           <div class="form-group">
-            <label>Stok Barang</label>
-            <input type="number" name="stok" placeholder="Masukkan Stok" value="{{ $barangs->stok }}" class="form-control">
+            <label>Stok Awal</label>
+            <input type="number" name="stok" value="{{ $barangs->stok }}" placeholder="Stok Awal" class="form-control">
           </div>
-          <div class="form-group">
-            <label>Harga</label>
-            <div class="input-group">
-              <span class="input-group-addon">Rp</span>
-              <input type="text" name="harga" placeholder="Masukan Harga" value="{{ $barangs->harga }}" class="form-control">
+          <div class="row">
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Harga</label>
+                <input type="number" name="harga" value="{{ $barangs->harga }}" placeholder="Masukkan Harga" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Harga Jual</label>
+                <input type="number" name="harga_jual" value="{{ $barangs->harga_jual }}" placeholder="Masukkan Harga Jual" class="form-control">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>Harga Jual</label>
+                <input type="number" name="harga_khusus" value="{{ $barangs->harga_khusus }}" placeholder="Masukkan Harga Khusus" class="form-control">
+              </div>
             </div>
           </div>
           <div class="form-group">
-            <label>Harga Jual</label>
-            <div class="input-group">
-              <span class="input-group-addon">Rp</span>
-              <input type="text" name="harga_jual" placeholder="Masukan Harga Jual" value="{{ $barangs->harga_jual }}" class="form-control">
-            </div>
+            <label>Nilai Tukar Poin</label>
+            <input type="number" name="bobot_poin" value="{{ $barangs->bobot_poin }}" placeholder="Masukkan Poin" class="form-control">
           </div>
           <div class="form-group">
-            <label>Bobot Poin</label>
-            <input type="number" name="bobot_poin" placeholder="Masukkan Stok" value="{{ $barangs->bobot_poin }}" class="form-control">
+            <label>Opsi Tukar Poin</label>
+            <br>
+
+            @if($barangs->opsi_tukarpoin == 'yes')
+              <label class="radio-inline">
+                <input checked="checked" type="radio" name="opsi_tukarpoin" value="yes"> <span class="label label-success">Ya</span>
+              </label>
+              <label class="radio-inline">
+                <input type="radio" name="opsi_tukarpoin" value="no"> <span class="label label-danger">No</span>
+              </label>
+            @else
+              <label class="radio-inline">
+                <input type="radio" name="opsi_tukarpoin" value="yes"> <span class="label label-success">Ya</span>
+              </label>
+              <label class="radio-inline">
+                <input checked="checked" type="radio" name="opsi_tukarpoin" value="no"> <span class="label label-danger">No</span>
+              </label>
+            @endif
           </div>
-          <div class="form-group">
-            <button type="submit" class="btn btn-info">Simpan Barang</button>
+          <hr>
+          <div class="form-group clearfix">
+            <button type="submit" class="btn btn-info pull-right">Simpan Barang</button>
           </div>
         </form>
       </div>
@@ -167,10 +197,11 @@
       <div class="modal-body">
         <form action="{{ action('BarangController@tambahStok')}}" method="post">
           {{ csrf_field() }}
+          <input type="hidden" name="user_id" value="{{ Auth::user()->id }}">
           <input type="hidden" name="id" value="{{ $barangs->id }}">
           <div class="form-group">
             <label>Nama Barang</label>
-            <input type="text" disabled name="nama_barang" placeholder="Masukkan Nama Barang" value="{{ $barangs->nama_barang }}" class="form-control">
+            <input required type="text" disabled name="nama_barang" placeholder="Masukkan Nama Barang" value="{{ $barangs->nama_barang }}" class="form-control">
           </div>
           <div class="row">
             <div class="col-md-6">

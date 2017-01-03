@@ -11,6 +11,8 @@ Laporan Penjualan
 @section('content')
 @include('partials.navbar')
 @include('partials.alert')
+@include('partials.validationmessage')
+
 <ul class="nav nav-tabs" id="myTab">
   <li class="active"><a data-target="#toko" data-toggle="tab">Bengkel</a></li>
   <li><a data-target="#tema" data-toggle="tab">Tema</a></li>
@@ -21,7 +23,6 @@ Laporan Penjualan
     <div class="row">
       <div class="col-md-12">
         <h3>Setting Informasi Bengkel</h3>
-        <hr>
         <form class=" col-md-6" action="{{ action('TokoController@postEditToko') }}" method="post">
           {{ csrf_field() }}
           <input type="hidden" name="id" value="{{ $toko->id }}">
@@ -49,7 +50,6 @@ Laporan Penjualan
 
   <div class="tab-pane" id="tema">
     <h3>Pilih Tema Tampilan</h3>
-    <hr>
     <form action="{{ action('TokoController@applyTheme') }}" method="post">
       {{ csrf_field() }}
       <div class="form-group">

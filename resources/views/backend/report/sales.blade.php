@@ -4,125 +4,86 @@
 Laporan Penjualan
 @endsection
 
-@section('custom_styles')
+<?php 
+  $stringHeader = "Laporan Penjualan" 
+?>
 
-@endsection
+@if(!$bulan == null && !$tahun == null)
+  <?php
+    foreach($listBulan as $key => $value){
+      if ($bulan == $key) {
+        $stringBulan = $value;
+      }
+      // <option value="{{ $key }}">{{ $value }}</option>
+    }
+
+    $stringHeader .= " - Bulan : " . $stringBulan . ' ' . $tahun; 
+  ?>
+@else
+
+@endif
 
 @section('content')
 @include('partials.navbar')
 @include('partials.alert')
 <div class="row">
   <div class="col-md-12">
-
-    <ul class="nav nav-tabs" id="myTab">
-      <li class="active"><a data-target="#tranksaksi" data-toggle="tab">Tranksaksi</a></li>
-      <li><a data-target="#penukaranpoin" data-toggle="tab">Penukaran Poin</a></li>
-    </ul>
-
-    <div class="tab-content">
-      <div class="tab-pane active" id="tranksaksi">
-        <div class="row">
-          <div class="col-md-12">
-            <h3>Laporan Tranksaksi
-              <div class="pull-right">
-                <a href="{{ action('ExportController@barangMasukToPdf') }}" class="btn btn-sm btn-success">Cetak PDF</a>
-                <a href="{{ action('ExportController@barangMasukToPdf') }}" class="btn btn-sm btn-success">Cetak PDF</a>
-              </div>
-            </h3>
-          </div>
-
-          <div class="col-md-12 pull-right">
-            <br>
-            <form class="form-input" action="index.html" method="post">
-              <div class="row">
-                <div class="col-md-2">
-                  <div class="form-group">
-                    <select class="form-control" name="bulan">
-                      <option value="1">Januari</option>
-                      <option value="2">Februari</option>
-                      <option value="3">Maret</option>
-                      <option value="4">April</option>
-                      <option value="5">Mei</option>
-                      <option value="6">Juni</option>
-                      <option value="7">Juli</option>
-                      <option value="8">Agustus</option>
-                      <option value="9">September</option>
-                      <option value="10">Oktober</option>
-                      <option value="11">November</option>
-                      <option value="12">Desember</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-2">
-                  <div class="form-group">
-                    <select class="form-control" name="bulan">
-                      <option value="1">2016</option>
-                    </select>
-                  </div>
-                </div>
-                <div class="col-md-4">
-                  <a href="{{ action('ExportController@barangMasukToPdf') }}" class="btn btn-success">Cetak PDF</a>
-                </div>
-              </div>
-            </form>
-          </div>
-
-        </div>
-        <hr>
-        <table class="table table-hover" id="tranksaks">
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>No Nota</th>
-              <th>Member</th>
-              <th>Subtotal</th>
-              <th><center>Diskon</center></th>
-              <th>Total Belanja</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($tranksaksi as $listTranksaksi)
-            <tr>
-              <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listTranksaksi->created_at) }}</td>
-              <td>{{ $listTranksaksi->nota_id }}</td>
-              <td>{{ $listTranksaksi->nama_member }}</td>
-              <td>Rp {{ number_format($listTranksaksi->subtotal) }}</td>
-              <td><center>{{ $listTranksaksi->diskon }}%</center></td>
-              <td>Rp {{ number_format($listTranksaksi->total) }}</td>
-              <td><a href="{{ route('nota.detail', $listTranksaksi->nota_id) }}" class="btn btn-xs btn-info">Detail</a></td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+  <div class="well">
+    <div class="row">
+      <div class="col-md-6">
+        <h3>{{ $stringHeader }}<small><a href="#" title="Laporan Laba Rugi" data-toggle="popover" data-trigger="focus" data-content="Halaman untuk menampilkan laporan laba rugi (bulanan)"><i class="fa fa-question-circle fa-lg"></i></a></small></h3>
       </div>
+      <div class="col-md-6" style="margin-top: 10px">
+        <div class="pull-right">
+          <form class="form-inline pull-right" action="{{ action('ReportController@postSales')}}" method="post">
+            {{ csrf_field() }}
+            <select class="form-control" name="bulan">
+              @foreach($listBulan as $key => $value)
+                <option value="{{ $key }}">{{ $value }}</option>
+              @endforeach
+            </select>
 
-      <div class="tab-pane" id="penukaranpoin">
-        <h3>Penukaran Poin Barang</h3>
-        <hr>
-        <table class="table table-hover table-striped" id="tukarPoin">
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Member</th>
-              <th>Barang</th>
-              <th>Operator</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($tukar_poin as $tukarPoin)
-            <tr>
-              <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($tukarPoin->created_at) }}</td>
-              <td>{{ $tukarPoin->nama_member }}</td>
-              <td>{{ $tukarPoin->nama_barang }}</td>
-              <td>{{ $tukarPoin->name }}</td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
+            <select class="form-control" name="tahun">
+              @foreach($listTahun as $value)
+                <option value="{{ $value }}">{{ $value }}</option>
+              @endforeach
+            </select>
+            <button type="submit" class="btn btn-success" name="button" value="filter">Filter</button>
+            <a href="{{ action('ReportController@sales') }}" class="btn btn-info">Hapus Filter</a>
+            <button type="submit" class="btn btn-primary" name="button" value="pdf">Print to PDF</button>
+          </form>
+        </div>
       </div>
     </div>
   </div>
+
+
+  <table class="table table-hover table-bordered table-condensed" id="tranksaks">
+    <thead>
+      <tr class="info">
+        <th style="width: 21%"><center>Tanggal</center></th>
+        <th><center>No Nota</center></th>
+        <th><center>No Faktur</center></th>
+        <th><center>Member</center></th>
+        <th><center>Total Belanja</center></th>
+        <th><center>Kasir</center></th>
+        <th><center>Aksi</center></th>
+      </tr>
+    </thead>
+    <tbody>
+      @foreach($tranksaksi as $listTranksaksi)
+      <tr>
+        <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesiaWithSecond($listTranksaksi->created_at) }}</center></td>
+        <td><center>{{ $listTranksaksi->nota_id }}</center></td>
+        <td><center>{{ $listTranksaksi->faktur_id }}</center></td>
+        <td><center>{{ $listTranksaksi->nama_member }}</center></td>
+        <td><center>Rp {{ number_format($listTranksaksi->subtotal) }}</center></td>
+        <td><center>{{ $listTranksaksi->name }}</center></td>
+        <td><center><a href="{{ route('nota.detail', $listTranksaksi->nota_id) }}" class="btn btn-xs btn-info">Detail</a></center></td>
+      </tr>
+      @endforeach
+    </tbody>
+  </table>
 </div>
 @endsection
 

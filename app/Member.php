@@ -11,4 +11,9 @@ class Member extends Model
       return $this->hasMany('App\Tranksaksi');
     }
 
+    public function tukarpoin()
+    {
+      return $this->hasMany('App\TukarPoin');
+    }
+
 }

@@ -22,6 +22,23 @@ class TokoController extends Controller
 
     public function postEditToko(Request $request)
     {
+      $messages = [
+        'nama_toko.required' => 'Nama Toko Tidak Boleh Kosong',
+        'telepon.required' => 'Nomor Telepon Tidak Boleh Kosong',
+        'email.required' => 'Email tidak boleh kosong',
+        'email.email' => 'Email harus mengandung unsur @',
+        'alamat.required' => 'Alamat tidak boleh kosong'
+      ];
+
+      $rules = [
+        'nama_toko' => 'required',
+        'telepon'      => 'required',
+        'email'     => 'required',
+        'alamat'  => 'required',
+      ];
+
+      $this->validate($request, $rules, $messages);
+
       $toko = Toko::findOrFail($request->input('id'));
       $toko->nama_toko = $request->input('nama_toko');
       $toko->telepon = $request->input('telepon');

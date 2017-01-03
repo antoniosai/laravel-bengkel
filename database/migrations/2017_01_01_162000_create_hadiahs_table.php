@@ -1,11 +1,11 @@
 <?php
 
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateRoleUserTable extends Migration
+class CreateHadiahsTable extends Migration
 {
-
     /**
      * Run the migrations.
      *
@@ -13,10 +13,11 @@ class CreateRoleUserTable extends Migration
      */
     public function up()
     {
-        Schema::create('role_user', function (Blueprint $table) {
+        Schema::create('hadiahs', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('role_id')->unsigned()->index()->foreign()->references("id")->on("roles")->onDelete("cascade");
-            $table->integer('user_id')->unsigned()->index()->foreign()->references("id")->on("users")->onDelete("cascade");
+            $table->string('nama_barang');
+            $table->integer('bobot_poin');
+            $table->integer('stok');
             $table->timestamps();
         });
     }
@@ -28,7 +29,6 @@ class CreateRoleUserTable extends Migration
      */
     public function down()
     {
-        Schema::drop('role_user');
+        Schema::dropIfExists('hadiahs');
     }
-
 }

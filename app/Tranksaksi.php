@@ -16,6 +16,11 @@ class Tranksaksi extends Model
       return $this->belongsTo('App\Member');
     }
 
+    public function user()
+    {
+      return $this->belongsTo('App\User');
+    }
+
     public function scopeMember($query)
     {
       return $query->where('member_id', 1);

@@ -6,25 +6,42 @@ use Illuminate\Http\Request;
 
 use App\Poin;
 use App\Diskon;
+use App\Hadiah;
 
 class BonusController extends Controller
 {
     public function index()
     {
       $poin = Poin::all()->sortBy('harga_belanja');
-      $diskon = Diskon::all()->sortBy('harga_belanja');
-
+      $hadiah = Hadiah::all();
       return view('backend.bonus',[
         'poin' => $poin,
-        'diskon' => $diskon
+        'hadiah' => $hadiah
       ]);
     }
 
-    public function postAddDiskon(Request $request)
+    public function postAddHadiah(Request $request)
     {
-      $diskon = new Diskon;
-      $diskon->harga_belanja = $request->input('harga_belanja');
-      $diskon->diskon = $request->input('diskon');
+      $messages = [
+        'nama_barang.required' => 'Nama barang harus diisi',
+        'bobot_poin.required' => 'Bobot poin harus diisi',
+        'bobot_poin.integer' => 'Bobot poin harus berupa angka',
+        'stok.required' => 'Stok harus diisi',
+        'stok.integer' => 'Stok harus berupa angka'
+      ];
+
+      $rules = [
+        'nama_barang' => 'required|unique:hadiahs',
+        'bobot_poin' => 'required|integer',
+        'stok' => 'required|integer'
+      ];
+
+      $this->validate($request, $rules, $messages);
+
+      $diskon = new Hadiah;
+      $diskon->nama_barang = $request->input('nama_barang');
+      $diskon->bobot_poin = $request->input('bobot_poin');
+      $diskon->stok = $request->input('stok');
       $diskon->save();
 
       if ($diskon) {
@@ -35,10 +52,25 @@ class BonusController extends Controller
 
     public function postAddPoin(Request $request)
     {
+      $rules = [
+        'harga_belanja'      => 'required|integer',
+        'poin'     => 'required|integer'
+      ];
+
+      $messages = [
+        'harga_belanja.required' => 'Harga Belanja harus diisi',
+        'poin.required' => 'Poin harus diisi',
+        'harga_belanja.integer' => 'Harga Belanja harus berupa nominal (angka)',
+        'poin.integer' => 'Poin harus berupa angka'
+      ];
+
+      $this->validate($request, $rules, $messages);
+
       $poin = new Poin;
       $poin->harga_belanja = $request->input('harga_belanja');
       $poin->poin = $request->input('poin');
       $poin->save();
+
 
       if ($poin) {
         $request->session()->flash('alert-success', 'Poin berhasil ditambahkan');
@@ -62,6 +94,21 @@ class BonusController extends Controller
 
     public function postSavePoin(Request $request)
     {
+
+      $rules = [
+        'harga_belanja'      => 'required|integer',
+        'poin'     => 'required|integer'
+      ];
+
+      $messages = [
+        'harga_belanja.required' => 'Harga Belanja harus diisi',
+        'poin.required' => 'Poin harus diisi',
+        'harga_belanja.integer' => 'Harga Belanja harus berupa nominal (angka)',
+        'poin.integer' => 'Poin harus berupa angka'
+      ];
+
+      $this->validate($request, $rules, $messages);
+
       $id = $request->input('id');
       $poin = Poin::findOrFail($id);
       $poin->harga_belanja = $request->input('harga_belanja');

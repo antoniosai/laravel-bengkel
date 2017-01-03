@@ -11,16 +11,16 @@ Laporan Member
 @section('content')
 @include('partials.navbar')
 <div class="well">
-  <h3>Pilih Member</h3>
+  <h3>Pilih Member Untuk Melihat Akivitas</h3>
 </div>
 @include('partials.alert')
 <div class="row">
   <div class="col-md-12">
 
     <br>
-    <table class="table table-hover" id="member">
+    <table class="table table-hover table-condensed" id="member">
       <thead>
-        <tr>
+        <tr class="info">
           <th>No</th>
           <th>Nama</th>
           <th>Poin</th>
@@ -39,7 +39,7 @@ Laporan Member
           <td>{{ $listMember->handphone }}</td>
           <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listMember->created_at) }}</td>
           <td>
-            <a href="#" class="btn btn-xs btn-info">Detail</a>
+            <a href="{{ route('report.member', $listMember->id) }}" class="btn btn-xs btn-info">Detail</a>
           </td>
         </tr>
         @endforeach

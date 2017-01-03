@@ -13,7 +13,7 @@ Point of Sales
   <div class="well">
     <div class="row" style="margin-left: 20px">
       <div class="col-md-2">
-        <h5>Tanggal {{ $poin }}</h5>
+        <h5>Tanggal</h5>
         <h4><strong>{{ date('d M Y') }}</strong></h4>
       </div>
       <div class="col-md-2">
@@ -79,19 +79,20 @@ Point of Sales
         @endif
       </div>
       <!-- End Pilih Member -->
-
     </div>
   </div>
   <hr>
   @include('partials.alert')
   @include('partials.warning')
+  @include('partials.validationmessage')
+
   <div class="col-md-6">
     <div class="well">
       <h4>Pilih Barang untuk Ditambahkan</h4>
       <hr>
       <form class="" action="{{ action('PosController@saveOrder')}}" method="post">
         {{ csrf_field() }}
-        <input type="hidden" name="member_id" value="{{$member_id}}">
+        <input type="hidden" name="member_id" value="{{ $member_id }}">
         <input type="hidden" name="nota_id" value="{{ $nota }}">
         <div class="row">
           <div class="col-md-7">
@@ -100,7 +101,7 @@ Point of Sales
                 <option disabled value="">Pilih Barang</option>
                 <option value="" selected="selected"></option>
                 @foreach($barang as $barangs)
-                <option value="{{ $barangs->id }}">{{ $barangs->nama_barang}} | Rp {{ number_format($barangs->harga_jual) }} </option>
+                  <option value="{{ $barangs->id }}">{{ $barangs->nama_barang}} | Rp {{ number_format($barangs->harga_jual) }} </option>
                 @endforeach
               </select>
             </div>
@@ -174,17 +175,17 @@ Point of Sales
           <h4>Rp {{ number_format($total) }}</h4>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="alert alert-warning">
-          Discount
-          <h4>{{ $diskon }}%</h4>
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-addon input-sm">Rp</span>
+          <input type="text" name="bayar" placeholder="Masukan Jumlah Bayar" class="form-control input-sm">
         </div>
+        <div class="col-md-4">
+            <h4>Rp.{{ number_format(50000) }}</h4>
+          </div>
       </div>
-      <div class="col-md-4">
-        <div class="alert alert-danger">
-          Total
-          <h4>Rp {{ number_format($grand_total) }}</h4>
-        </div>
+      <div col-md-2>
+        <h3>Proses</h3>
       </div>
       <div class="col-md-12">
         <div class="row">
