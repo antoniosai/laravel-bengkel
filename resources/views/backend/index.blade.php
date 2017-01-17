@@ -5,17 +5,15 @@ Menu Utama
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well">
   <h4>Point Of Sales (POS)
     <div class="pull-right">
-      <button type="button" class="btn btn-success btn-xs" data-toggle="modal" data-target="#tukarPoin">Tukar Poin</button>
-      <a href="{{ url('admin/pos/') }}" class="btn btn-success btn-xs">Buat POS Baru</a>
+      <a href="{{ action('ReturnController@index') }}" class="btn btn-success btn-sm"><i class="fa fa-lg fa-arrow-circle-o-left"></i> Return</a> | 
+      <button type="button" class="btn btn-success btn-sm" data-toggle="modal" data-target="#tukarPoin"><i class="fa fa-gift fa-lg"></i> Tukar Poin</button>
+      <a href="{{ url('admin/pos/') }}" class="btn btn-success btn-sm"><i class="fa fa-lg fa-file-o"></i> Buat POS Baru</a>
     </div>
   </h4>
 </div>
-@include('partials.alert')
-@include('partials.warning')
 <ul class="nav nav-tabs" id="myTab">
   <li class="active"><a data-target="#pendingSales" data-toggle="tab">Pending Sales</a></li>
 </ul>
@@ -38,7 +36,15 @@ Menu Utama
         <tr>
           <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesiaWithSecond($list->created_at) }}</center></td>
           <td><center>{{ $list->nota_id }}</center></td>
-          <td><center>{{ $list->nama_member }}</center></td>
+          <td>
+            <center>
+              @if($list->nama_member != 'Guest')
+                {{ $list->nama_member }} <span class="label label-success">{!! $list->type_member !!}</span>
+              @else
+                {{ $list->nama_member }}
+              @endif
+            </center>
+          </td>
           <td><center>Rp. {{ number_format($list->total) }}</center></td>
           <td>
             <center><a href="{{ url('admin/pos/'.$list->nota_id.'/'.$list->id) }}" class="btn btn-warning btn-xs">Buka</a>
@@ -76,7 +82,7 @@ Menu Utama
                 @foreach($member as $anggota)
                   @if($anggota->nama_member == 'Guest')
                   @endif
-                <option {{ $class = 'yes'}} value="{{ $anggota->id }}">{{ $anggota->nama_member }} ---- Sisa Poin : {{ $anggota->poin }}</option>
+                <option {{ $class = 'yes'}} value="{{ $anggota->id }}">{{ $anggota->nama_member }} ---- Sisa Poin : {{ $anggota->sisa_poin }}</option>
                 @endforeach
               </select>
             </div>

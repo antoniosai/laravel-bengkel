@@ -20,11 +20,13 @@ Route::get('keluar', 'UserController@keluar');
 
 Route::group(['middleware' => 'auth'], function(){
   Route::get('/', 'PosController@dashboard');
+  Route::get('user/setting', 'UserController@getProfile');
+  Route::post('user/profile/update', 'UserController@postEditUser');
 });
 Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
 
   //=================== POS =====================//
-  Route::group(['prefix' => 'pos'], function(){
+  Route::group(['prefix' => 'pos', 'middleware' => ['role:sales']], function(){
     Route::get('/', 'PosController@index');
     Route::get('{nota}/{id}', [
       'as' => 'pos.idwithmember',
@@ -59,10 +61,21 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
     Route::post('setmember', 'PosController@applyMember');
     Route::post('unsetmember', 'PosController@unsetMember');
   });
-  //=================== POS =====================//
+  //=================== RETURN =====================//
+  Route::group(['prefix' => 'return', 'middleware' => ['role:return']], function(){
+    Route::get('/', 'ReturnController@index');
+
+    Route::get('/detail/{nota_id}', [
+      'as' => 'return.detail',
+      'uses' => 'ReturnController@detail'
+    ]);
+
+    Route::post('/', 'ReturnController@returns');
+  });
+  //=================== RETURN =====================//  
 
   //=================== BARANG =====================//
-  Route::group(['prefix' => 'barang'], function(){
+  Route::group(['prefix' => 'barang', 'middleware' => ['role:barang']], function(){
     Route::get('/', 'BarangController@getAddBarang');
     Route::post('add', 'BarangController@postAddBarang');
     Route::post('edit', 'BarangController@postEditBarang');
@@ -80,7 +93,7 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
 
 
   //=================== MEMBER =====================//
-  Route::group(['prefix' => 'member'], function(){
+  Route::group(['prefix' => 'member', 'middleware' => ['role:member']], function(){
     Route::get('/', 'MemberController@index');
     Route::post('add', 'MemberController@postAddMember');
     Route::post('edit', 'MemberController@postEditMember');
@@ -93,7 +106,7 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   //=================== MEMBER =====================//
 
   //=================== REPORT =====================//
-  Route::group(['prefix' => 'report'], function(){
+  Route::group(['prefix' => 'report', 'middleware' => ['role:laporan']], function(){
     Route::get('/', 'ReportController@index');
 
     //Sales
@@ -103,6 +116,12 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
       Route::get('/{bulan}/{tahun}', 'ReportController@salesByDate');
     });
     //End Sales
+
+    Route::group(['prefix' => 'return'], function(){
+      Route::get('/', 'ReportController@returns');
+
+      Route::post('/', 'ReportController@postReturns');
+    });
 
     //Member
     Route::group(['prefix' => 'member'], function(){
@@ -120,10 +139,8 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
     //Barang
     Route::group(['prefix' => 'barang'], function(){
       Route::get('/', 'ReportController@barang');
-      Route::get('{bulan}/{tahun}', [
-        'as' => 'barang.date',
-        'uses' => 'ReportController@barangByDate'
-      ]);
+      Route::post('/', 'ReportController@postFilterBarang');
+      Route::get('/{bulan}/{tahun}', 'ReportController@barangByDate');
     });
     //End Barang
     
@@ -170,9 +187,10 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   //=================== REPORT =====================//
 
   //=================== BONUS =====================//
-  Route::group(['prefix' => 'bonus'], function(){
+  Route::group(['prefix' => 'bonus', 'middleware' => ['role:poin']], function(){
     Route::get('/', 'BonusController@index');
     Route::post('bonus/add/hadiah', 'BonusController@postAddHadiah');
+    Route::post('bonus/edit/hadiah', 'BonusController@postEditHadiah');
     Route::post('bonus/poin/add', 'BonusController@postAddPoin');
     Route::post('bonus/poin/save', 'BonusController@postSavePoin');
 
@@ -180,6 +198,12 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
       'as' => 'delete.diskon',
       'uses' => 'BonusController@deleteDiskon'
     ]);
+
+    Route::get('delete/hadiah/{id}', [
+      'as' => 'delete.hadiah',
+      'uses' => 'BonusController@deleteHadiah'
+    ]);
+
     Route::get('delete/poin/{id}', [
       'as' => 'delete.poin',
       'uses' => 'BonusController@deletePoin'
@@ -188,10 +212,17 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   //=================== BONUS =====================//
 
   //=================== USER =====================//
-  Route::group(['prefix' => 'user'], function(){
+  Route::group(['prefix' => 'user', 'middleware' => ['role:user']], function(){
     Route::get('/', 'UserController@index');
 
     Route::post('create', 'UserController@postAddUser');
+
+    Route::get('delete/{id}', [
+      'as' => 'user.delete',
+      'uses' => 'UserController@deleteUser'
+    ]);
+
+    Route::post('permission/update', 'UserController@postEditPermission');
   });
   //=================== USER =====================//
 
@@ -205,11 +236,15 @@ Route::group(['middleware' => 'auth', 'prefix'=> 'admin'], function () {
   //=================== API =====================//
 
   //=================== SETTING =====================//
-  Route::group(['prefix' => 'setting'], function(){
+  Route::group(['prefix' => 'setting', 'middleware' => ['role:setting']], function(){
     Route::get('/','TokoController@index');
 
     Route::post('apply/theme', 'TokoController@applyTheme');
+    Route::post('apply/tampilan', 'TokoController@applyTampilan');
+
     Route::post('save/toko', 'TokoController@postEditToko');
+
+    Route::post('pemutihan', 'TokoController@pemutihanData');
   });
   //=================== SETTING =====================//
 
@@ -300,38 +335,18 @@ Route::group(['prefix' => 'test'], function(){
 
 
   Route::get('repeat-until', function(){
-    
-    // Basic roles data
-    App\Role::insert([
-        ['name' => 'admin'],
-        ['name' => 'manager'],
-        ['name' => 'editor'],
-    ]);
- 
-    // Basic permissions data
-    App\Permission::insert([
-        ['name' => 'access.backend'],
-        ['name' => 'create.user'],
-        ['name' => 'edit.user'],
-        ['name' => 'delete.user'],
-        ['name' => 'create.article'],
-        ['name' => 'edit.article'],
-        ['name' => 'delete.article'],
-    ]);
- 
-    // Add a permission to a role
-    $role = App\Role::where('name', 'admin')->first();
-    $role->addPermission('access.backend');
-    $role->addPermission('create.user');
-    $role->addPermission('edit.user');    
-    $role->addPermission('delete.user');
-    // ... Add other role permission if necessary
- 
-    // Create a user, and give roles
-    $user = App\User::find(18);
-    $user->assignRole('admin');
- 
-    // ... Add other user and assign them to roles
+    date_default_timezone_set('Asia/Jakarta');
+
+    $script_tz = date_default_timezone_get();
+
+    if (strcmp($script_tz, ini_get('date.timezone'))){
+        echo 'Script timezone differs from ini-set timezone.';
+    } else {
+        echo 'Script timezone and ini-set timezone match.';
+    }
+    echo date('Y-m-d h:s:m');
   });
+
+  Route::post('post-coba', 'TestController@cobaPost');
 });
 //=================== TEST AREA =====================//

@@ -22,7 +22,7 @@ Laporan Penukaran Poin<br/>
 @endsection
 
 @section('content')
-<table class="table table-hover table-striped table-bordered" id="poin">
+<table border="1">
   <thead>
     <tr class="header">
       <th style="width: 20%"><center>Tanggal Penukaran</center></th>

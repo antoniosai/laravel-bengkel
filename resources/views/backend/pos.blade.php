@@ -30,7 +30,6 @@ select {
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well" style="height: 90px; padding-top: 2px">
   <div class="row" style="margin-left: 20px">
     <div class="col-md-2">
@@ -103,8 +102,6 @@ select {
 
   </div>
 </div>
-@include('partials.alert')
-@include('partials.warning')
 <div class="col-md-8">
   <form name="selection">
     {{ csrf_field() }}

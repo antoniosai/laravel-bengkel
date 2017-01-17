@@ -24,7 +24,11 @@
             <input type="number" name="bobot_poin" placeholder="Masukan Bobot Poin" class="form-control">
           </div>
           <div class="form-group">
-            <button type="submit" class="btn btn-info">Tambah Diskon</button>
+            <div class="clearfix">
+              <div class="pull-right">
+                <button type="submit" class="btn btn-info">Tambah Hadiah</button>
+              </div>
+            </div>
           </div>
         </form>
       </div>

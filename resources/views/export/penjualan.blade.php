@@ -22,7 +22,7 @@ Laporan Penjualan<br/>
 @endsection
 
 @section('content')
-<table>
+<table border="1">
   <thead>
     <tr class="header">
       <th><center>Tanggal</center></th>

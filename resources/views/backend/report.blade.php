@@ -9,11 +9,9 @@ Report
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well">
   <h3>Menu Report</h3>
 </div>
-@include('partials.alert')
 <div class="row">
   <div class="col-md-6">
     <h3>Report Poin Member

@@ -181,7 +181,7 @@ return [
         //3rd Party
         Barryvdh\DomPDF\ServiceProvider::class,
         Maatwebsite\Excel\ExcelServiceProvider::class,
-
+        Spatie\Permission\PermissionServiceProvider::class,
 
     ],
 

@@ -39,7 +39,7 @@ class PosController extends Controller
                     ->get();
 
     $orderQuery = "
-    SELECT order_temps.created_at,order_temps.nota_id, members.nama_member, order_temps.total, members.id
+    SELECT order_temps.created_at,order_temps.nota_id, members.nama_member, order_temps.total, members.id, members.type_member
     FROM order_temps, members
     WHERE order_temps.member_id = members.id
     ";
@@ -69,7 +69,7 @@ class PosController extends Controller
       return redirect()->to('admin/pos/'.$nota.'/'.$member->id);
     }
 
-    $barang = Barang::where('stok', '!=', 0)->get();
+    $barang = Barang::all();
 
     $member = Member::where('nama_member', '!=', 'Guest')->get();
 
@@ -109,6 +109,17 @@ class PosController extends Controller
 
     $order = DB::select(DB::raw($queryOrder));
 
+    if ($order) {
+      foreach ($order as $listOrder) {
+        $barangSelected = Barang::findOrFail($listOrder->barang_id);
+
+        if ($barangSelected->stok == 0) {
+          $this->deleteItem($nota, $listOrder->barang_id);
+        }
+
+      }
+    }
+
     return view('backend.posbackup',[
       'nota' => $this->setNota($nota),
       'barang' => $barang,
@@ -125,6 +136,8 @@ class PosController extends Controller
   public function detailNota($nota)
   {
 
+    // return $tranksaksiAll = Tranksaksi::where('nota_id', $notaId)->get();
+
     $tranksaksiTempQuery = "
       SELECT tranksaksi_temps.created_at, tranksaksi_temps.nota_id, tranksaksi_temps.faktur_id, users.name, members.nama_member, tranksaksi_temps.total, tranksaksi_temps.subtotal
       FROM tranksaksi_temps, members, users
@@ -134,11 +147,12 @@ class PosController extends Controller
     ";
 
     $tranksaksiQuery = "
-      SELECT tranksaksis.created_at, tranksaksis.nota_id ,barangs.nama_barang, tranksaksis.harga_pokok, tranksaksis.harga_umum, tranksaksis.harga_khusus, tranksaksis.qty, tranksaksis.total, barangs.id as barang_id, members.id as member_id
-      FROM barangs, tranksaksis, members
+      SELECT tranksaksis.id as tranksaksi_id, tranksaksis.created_at, tranksaksis.nota_id ,barangs.nama_barang, tranksaksis.harga_pokok, tranksaksis.harga_umum ,tranksaksis.harga_khusus, tranksaksis.harga_grosir, tranksaksis.qty, tranksaksis.total, barangs.id as barang_id, members.id as member_id, users.id as user_id
+      FROM barangs, tranksaksis, members, users
       WHERE tranksaksis.nota_id = $nota
       AND tranksaksis.member_id = members.id
       AND tranksaksis.barang_id = barangs.id
+      AND tranksaksis.user_id = users.id
       ORDER BY tranksaksis.created_at DESC
     ";
 
@@ -214,10 +228,14 @@ class PosController extends Controller
     $hargaBarang = $barang->harga_khusus;
 
     if ($member->nama_member != 'Guest'){
-      if ($hargaBarang == null) {
-        return $this->hargaBarang = $barang->harga_jual;
+      if ($member->type_member == 'grosir') {
+        return $this->hargaBarang = $barang->harga_grosir;
       } else {
-        return $this->hargaBarang = $hargaBarang;
+        if ($hargaBarang == null) {
+          return $this->hargaBarang = $barang->harga_jual;
+        } else {
+          return $this->hargaBarang = $hargaBarang;
+        }  
       }
     } else {
       return $this->hargaBarang = $barang->harga_jual;
@@ -311,9 +329,11 @@ class PosController extends Controller
   public function saveOrder(Request $request)
   {
 
+    // return $request->all();
+
     $messages = [
       'barang_id.required' => 'Pilih barang untuk dimasukkan kedalam order',
-      'qty.required' => 'Qty (qty) tidak boleh kurang dari 1'
+      'qty.required' => 'Qty tidak boleh kurang dari 1'
     ];
 
     $rules = [
@@ -338,6 +358,15 @@ class PosController extends Controller
     if ($request->input('qty') > $barang->stok) {
       $request->session()->flash('alert-danger', 'Oppps! Quantity melebih stok yang tersedia');
       return redirect()->back()->withInput();
+    }
+
+    if ($order) {
+      $totalOrder = $order->qty + $request->input('qty');
+
+      if ($totalOrder > $barang->stok) {
+        $request->session()->flash('alert-danger', 'Stok tidak mencukupi');
+        return redirect()->back()->withInput();
+      }
     }
 
     $poin = 0;
@@ -510,12 +539,21 @@ class PosController extends Controller
       return redirect()->back();
     }
 
+    $barang = Barang::findOrFail($request->input('barang_id'));
+    $order = Order::findOrFail($request->input('id'));
+    
+    $totalOrder = $order->qty + $request->input('qty');
+
+    if ($request->input('qty') > $barang->stok) {
+      $request->session()->flash('alert-danger', 'Stok tidak mencukupi');
+      return redirect()->back()->withInput();
+    }
+
     $this->setHarga($request->input('member_id'), $request->input('barang_id'));
 
     $barangId = $request->input('barang_id');
     $barang = Barang::findOrFail($barangId);
 
-    $order = Order::findOrFail($request->input('id'));
     $order->qty = $request->input('qty');
     $order->total = $this->getHarga() * $request->input('qty');
     $order->save();
@@ -534,9 +572,11 @@ class PosController extends Controller
   //Save permanent Tranksasksi, table: Tranksaksi
   public function saveTranksaksi(Request $request)
   {
+    // return $request->all();
+
     if ($request->input('grand_total') == 0) {
       $request->session()->flash('success', 'Keranjang belanja masih kosong, silahkan tambah');
-      return redirect()->back();
+      return redirect()->back()->with('errorMessage', 'Keranjang belanja masih kosong, silahkan tambah');
     }
 
     $user_id = $request->input('user_id');
@@ -546,19 +586,9 @@ class PosController extends Controller
     $qty = $request->input('qty');
     $total = $request->input('total');
 
-    if (!$request->input('diskon') == "") {
-      $diskon = $request->input('diskon');
-    } else {
-      $diskon = 0;
-    }
 
     $this->hitungGrandTotal($request->input('diskon'), $request->input('grand_total'));
     $grandTotal = $this->getGrandTotal();
-
-    if ($request->input('bayar') < $grandTotal) {
-      $request->session()->flash('alert-danger', 'Jumlah bayar kurang');
-      return redirect()->back();
-    }
 
     $count = count($barang_id);
 
@@ -578,16 +608,23 @@ class PosController extends Controller
       $member = Member::findOrFail($member_id);
       //Menentukan Harga Barang
       $harga_khusus = 0;
+      $hargasatuan = 0;
 
-      if ($member->nama_member != "Guest") {
-        if ($barang->harga_khusus == "") {
-          $harga_khusus = 0;
+      if ($member->nama_member == "Guest") {
+        $hargasatuan = $barang->harga_jual;
+      } else {
+        if ($member->type_member == "grosir") {
+          $hargasatuan = $barang->harga_grosir;
         } else {
-          $harga_khusus = $barang->harga_khusus;
+          if ($barang->harga_khusus == null) {
+            $hargasatuan = $barang->harga_jual;
+          } else {
+            $hargasatuan = $barang->harga_khusus;          
+          }
         }
       }
-
       
+      // return $hargasatuan;
       //Selesai menentukan harga barang
 
       $tranksaksi = new Tranksaksi;
@@ -596,13 +633,14 @@ class PosController extends Controller
       $tranksaksi->member_id = $member_id;
       $tranksaksi->barang_id = $barang_id[$i];
       $tranksaksi->qty = $qty[$i];
+      $tranksaksi->harga_asli = $hargasatuan;
+      // $trankasksi->harga_satuan = '20000';
       $tranksaksi->harga_pokok = $barang->harga;
       $tranksaksi->harga_umum = $barang->harga_jual;
-      $tranksaksi->harga_khusus = $harga_khusus;
+      $tranksaksi->harga_khusus = $barang->harga_khusus;
+      $tranksaksi->harga_grosir = $barang->harga_grosir;
       $tranksaksi->total = $this->getGrandTotal();
       $tranksaksi->save();
-
-      
 
       $grandTotal = $grandTotal + $this->getGrandTotal();
       $omset = $omset + ($barang->harga * $qty[$i]);
@@ -659,6 +697,7 @@ class PosController extends Controller
 
     $member = Member::findOrFail($member_id);
     $member->poin = $member->poin + $request->input('poin');
+    $member->sisa_poin = $member->sisa_poin + $request->input('poin');
     $member->save();
 
     $this->hitungGrandTotal($request->input('diskon'), $request->input('grand_total'));
@@ -681,6 +720,10 @@ class PosController extends Controller
     $orderTemp = OrderTemp::where('nota_id', '=', $nota_id)->first();
     $orderTemp->delete();
 
+    if ($request->input('submit') == 'print') {
+      return redirect()->to('export/penjualan/'.$nota_id);
+    }
+
     $request->session()->flash('alert-success', 'Tranksaksi telah berhasil diproses');
     return redirect()->to('/');
   }
@@ -691,7 +734,7 @@ class PosController extends Controller
 
     $member = Member::findOrFail($request->input('member_id'));
 
-    if ($member->poin < $barang->bobot_poin) {
+    if ($member->sisa_poin < $barang->bobot_poin) {
       $request->session()->flash('alert-danger', 'Oppsss! Poin tidak mencukupi untuk menukarkan barang dengan poin');
       return redirect()->back();
     }
@@ -700,9 +743,10 @@ class PosController extends Controller
     $tukarPoin->member_id = $member->id;
     $tukarPoin->barang_id = $barang->id;
     $tukarPoin->user_id = $request->input('user_id');
+    $tukarPoin->poin = $barang->bobot_poin;
     $tukarPoin->save();
 
-    $member->poin = $member->poin - $barang->bobot_poin;
+    $member->sisa_poin = $member->sisa_poin - $barang->bobot_poin;
     $member->save();
 
     $barang->stok = $barang->stok - 1;
@@ -740,17 +784,23 @@ class PosController extends Controller
 
   private function setPoin($belanja, $idMember = null)
   {
-    $member = $this->memberGuest();
+    $guest = $this->memberGuest();
 
-    if ($idMember == $member->id) {
+    $member = Member::findOrFail($idMember);
+
+    if ($idMember == $guest->id) {
       return 0;
     } else {
-      $poin = Poin::all()->sortByDesc('harga_belanja');
+      if ($member->type_member == 'grosir') {
+        return 0;
+      } else{
+        $poin = Poin::all()->sortByDesc('harga_belanja');
 
-      foreach ($poin as $poinList) {
-        if ($belanja > $poinList->harga_belanja) {
-          $this->poin = $poinList->poin;
-          return $this->poin;
+        foreach ($poin as $poinList) {
+          if ($belanja > $poinList->harga_belanja) {
+            $this->poin = $poinList->poin;
+            return $this->poin;
+          }
         }
       }
     }

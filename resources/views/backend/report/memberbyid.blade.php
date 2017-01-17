@@ -9,11 +9,9 @@ Laporan Barang
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well">
   <center>
     <div class="row" style="margin-top: -40px; margin-bottom: -15px">
-      <div class="col-md-1"></div>
       <div class="col-md-3">
         <h3>
           <small>Nama Member</small><br>
@@ -34,6 +32,18 @@ Laporan Barang
       </div>
       <div class="col-md-2">
         <h3>
+          <small>Sisa Poin</small><br>
+          <i>
+            @if($member->poin == "")
+              {{ 0 }}
+            @else
+              {{ $member->sisa_poin }}
+            @endif
+          </i>
+        </h3>
+      </div>
+      <div class="col-md-2">
+        <h3>
           <small>Total Tranksaksi</small><br>
           <i>{{ count($member->tranksaksi) }}</i>
         </h3>
@@ -44,7 +54,6 @@ Laporan Barang
           <i>{{ App\Http\Controllers\LibraryController::waktuIndonesia($member->created_at) }}</i>
         </h3>
       </div>
-      <div class="col-md-1"></div>
 
     </div>
   </center>
@@ -71,7 +80,7 @@ Laporan Barang
         </tr>
       </thead>
       <tbody>
-        @foreach($tranksaksi as $listTranksaksi)
+        @forelse($tranksaksi as $listTranksaksi)
         <tr>
           <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesiaWithSecond($listTranksaksi->created_at) }}</center></td>
           <td><center>{{ $listTranksaksi->nota_id }}</center></td>
@@ -81,19 +90,24 @@ Laporan Barang
           <td><center>{{ $listTranksaksi->name }}</center></td>
           <td><center><a href="{{ route('nota.detail', $listTranksaksi->nota_id) }}" class="btn btn-xs btn-info">Detail</a></center></td>
         </tr>
-        @endforeach
+        @empty
+        <tr>
+          <td></td>
+        </tr>
+        @endforelse
       </tbody>
     </table>
   </div>
 
   <div class="tab-pane" id="aktivitasTukarPoin">
     <br>
-    <table class="table table-hover table-striped table-bordered table-condensed" id="poin">
+    <table class="table table-hover table-striped table-bordered table-condensed">
       <thead>
         <tr class="info">
-          <th><center>Tanggal Penukaran</center></th>
+          <th style="width: 180px"><center>Tanggal Penukaran</center></th>
           <th><center>Nama Member</center></th>
           <th><center>Barang</center></th>
+          <th><center>Poin</center></th>
           <th><center>Operator</center></th>
         </tr>
       </thead>
@@ -104,6 +118,7 @@ Laporan Barang
           <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listPoin->created_at) }}</center></td>
           <td><center>{{ $listPoin->nama_member }}</center></td>
           <td><center>{{ $listPoin->nama_barang }}</center></td>
+          <td><center>-{{ $listPoin->poin }}</center></td>
           <td><center>{{ $listPoin->name }}</center></td>
         </tr>
         @endforeach

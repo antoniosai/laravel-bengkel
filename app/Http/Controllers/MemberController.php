@@ -40,7 +40,10 @@ class MemberController extends Controller
       $member->no_member = $this->generateNoMember();
       $member->nama_member = $request->input('nama_member');
       $member->handphone = $request->input('handphone');
+      $member->type_member = $request->input('type_member');
       $member->alamat = $request->input('alamat');
+      $member->poin = 0;
+      $member->sisa_poin = 0;
       $member->save();
 
       if ($member) {
@@ -72,6 +75,7 @@ class MemberController extends Controller
       $member->nama_member = $request->input('nama_member');
       $member->handphone = $request->input('handphone');
       $member->alamat = $request->input('alamat');
+      $member->type_member = $request->input('type_member');
       $member->save();
 
       if ($member) {

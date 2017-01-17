@@ -1,4 +1,3 @@
-<!-- Modal -->
 <div class="modal fade" id="tambahBarang" role="dialog">
   <div class="modal-dialog">
 
@@ -20,28 +19,30 @@
             <input type="number" name="stok" value="{{ old('stok') }}" placeholder="Stok Awal" class="form-control">
           </div>
           <div class="row">
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="form-group">
                 <label>Harga</label>
                 <input type="number" name="harga" value="{{ old('harga') }}" placeholder="Masukkan Harga" class="form-control">
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="form-group">
-                <label>Harga Jual</label>
+                <label>Harga Umum</label>
                 <input type="number" name="harga_jual" value="{{ old('harga_jual') }}" placeholder="Masukkan Harga Jual" class="form-control">
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <div class="form-group">
-                <label>Harga Jual</label>
+                <label>Harga Khusus</label>
                 <input type="number" name="harga_khusus" value="{{ old('harga_khusus') }}" placeholder="Masukkan Harga Khusus" class="form-control">
               </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Nilai Tukar Poin</label>
-            <input type="number" name="bobot_poin" value="{{ old('bobot_poin') }}" placeholder="Masukkan Poin" class="form-control">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>Harga Grosir</label>
+                <input type="number" name="harga_grosir" value="{{ old('harga_grosir') }}" placeholder="Masukkan Harga Grosir" class="form-control">
+              </div>
+            </div>
           </div>
           <div class="form-group">
             <label>Opsi Tukar Poin</label>

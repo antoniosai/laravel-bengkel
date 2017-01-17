@@ -9,11 +9,9 @@ Laporan Member
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well">
   <h3>Pilih Member Untuk Melihat Akivitas</h3>
 </div>
-@include('partials.alert')
 <div class="row">
   <div class="col-md-12">
 
@@ -21,11 +19,11 @@ Laporan Member
     <table class="table table-hover table-condensed" id="member">
       <thead>
         <tr class="info">
-          <th>No</th>
-          <th>Nama</th>
-          <th>Poin</th>
-          <th>Handphone</th>
-          <th>Tanggal Daftar</th>
+          <th><center>No</center></th>
+          <th><center>Nama</center></th>
+          <th><center>Poin</center></th>
+          <th><center>Handphone</center></th>
+          <th><center>Tanggal Daftar</center></th>
           <th></th>
         </tr>
       </thead>
@@ -33,14 +31,14 @@ Laporan Member
         <?php $no = 1 ?>
         @foreach($member_eloquent as $listMember)
         <tr>
-          <td>{{ $no++ }}</td>
-          <td>{{ $listMember->nama_member }}</td>
-          <td>{{ $listMember->poin }}</td>
-          <td>{{ $listMember->handphone }}</td>
-          <td>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listMember->created_at) }}</td>
+          <td><center>{{ $no++ }}</center></td>
+          <td><center>{{ $listMember->nama_member }}</center></td>
+          <td><center>{{ $listMember->poin }}</center></td>
+          <td><center>{{ $listMember->handphone }}</center></td>
+          <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesia($listMember->created_at) }}</td>
           <td>
             <a href="{{ route('report.member', $listMember->id) }}" class="btn btn-xs btn-info">Detail</a>
-          </td>
+          </center></td>
         </tr>
         @endforeach
       </tbody>

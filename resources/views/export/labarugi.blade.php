@@ -17,7 +17,7 @@ Laporan Laba Rugi<br/>
 @endsection
 
 @section('content')
-<table class="table table-striped table-bordered">
+<table class="table table-striped table-bordered" border="1">
   <thead>
     <tr class="header">
       <th style="width: 15%; text-align: center">TANGGAL</th>

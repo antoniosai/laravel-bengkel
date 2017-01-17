@@ -1,7 +1,19 @@
 @extends('export.layout')
 
 @section('title')
-Barang Masuk
+<?php
+
+  foreach($listBulan as $key => $value){
+    if ($bulan == $key) {
+      $stringBulan = $value;
+    }
+    // <option value="{{ $key }}">{{ $value }}</option>
+  }
+
+  $stringHeader = $stringBulan . ' ' . $tahun; 
+?>
+Laporan Barang Masuk<br/>
+<small>{{ $stringHeader }}</small>
 @endsection
 
 @section('custom_styles')
@@ -12,7 +24,7 @@ Barang Masuk
 @endsection
 
 @section('content')
-<table>
+<table border="1">
   <thead>
     <tr class="header">
       <th><center>No</center></th>

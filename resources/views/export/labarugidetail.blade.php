@@ -10,7 +10,7 @@ Laporan Penukaran Poin<br/>
 @endsection
 
 @section('content')
-<table>
+<table border="1">
   <thead>
     <tr class="header">
       <th style="width: 9%"><center>Waktu</center></th>

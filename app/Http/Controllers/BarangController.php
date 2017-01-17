@@ -12,6 +12,10 @@ use App\BarangMasuk;
 use App\Order;
 use App\OrderTemp;
 use App\Tranksaksi;
+use App\User;
+use App\Toko;
+
+use Auth;
 
 use Excel; 
 
@@ -32,7 +36,7 @@ class BarangController extends Controller
 
     public function getAddBarang()
     {
-      $barang = Barang::select('id', 'harga', 'harga_jual', 'harga_khusus', 'nama_barang', 'bobot_poin' ,'stok', 'opsi_tukarpoin')->get();
+      $barang = Barang::select('id', 'harga', 'harga_jual', 'harga_grosir' ,'harga_khusus', 'nama_barang', 'bobot_poin' ,'stok', 'opsi_tukarpoin')->get();
 
       return view('backend.barang', [
         'barang' => $barang
@@ -44,6 +48,7 @@ class BarangController extends Controller
       $importExcel = Excel::load($request->file('excel'), function($reader){
         $reader->each(function($sheet){
           Barang::firstOrCreate($sheet->toArray());
+          // return $sheet->toArray();
         });
       });
 
@@ -67,10 +72,10 @@ class BarangController extends Controller
     public function generateExcelTemplate()
     {
 
-      Excel::create('Template Import Buku', function($excel) {
+      Excel::create('Template Import Barang', function($excel) {
       // Set the properties
         $excel->setTitle('Template Import Barang')
-          ->setCreator('Area Motor')
+          ->setCreator(User::find(Auth::user()->id)->name)
           ->setCompany('Area Motor')
           ->setDescription('Import Barang');
           $excel->sheet('Data Barang', function($sheet) {
@@ -81,7 +86,8 @@ class BarangController extends Controller
             'harga',
             'harga_jual',
             'harga_khusus',
-            'bobot_poin'
+            'harga_grosir',
+            'opsi_tukarpoin'
           ]);
         });
       })->export('xlsx');
@@ -92,15 +98,22 @@ class BarangController extends Controller
       // return $request->all();
 
       if ($request->input('harga_jual') < $request->input('harga')) {
-        $request->session()->flash('alert-warning', 'Harga jual tidak boleh lebih rendah dari harga beli');
+        $request->session()->flash('alert-warning', 'Harga umum tidak boleh lebih rendah dari harga beli');
         return redirect()->back()->withInput();
       }
+
+      if ($request->input('harga_grosir') < $request->input('harga')) {
+        $request->session()->flash('alert-warning', 'Harga grosir tidak boleh lebih rendah dari harga beli');
+        return redirect()->back()->withInput();
+      }
+
 
       $rules = [
         'nama_barang' => 'required|unique:barangs',
         'stok'      => 'required|integer',
         'harga'     => 'required|integer',
         'harga_jual'  => 'required|integer',
+        'harga_grosir' => 'required|integer'
       ];
 
       $messages = [
@@ -112,6 +125,8 @@ class BarangController extends Controller
         'harga_jual.required' => 'Harga jual harus diisi',
         'harga_jual.integer' => 'Harga jual harus berupa nominal (angka)',
         'harga_khusus.integer' => 'Harga harus berupa nominal (angka)',
+        'harga_grosir.required' => 'Harga grosir harus diisi',
+        'harga_khusus.integer' => 'Harga grosir harus berupa nominal (angka)',
       ];
 
       $this->validate($request, $rules, $messages);
@@ -128,15 +143,12 @@ class BarangController extends Controller
       $barang->nama_barang = $request->input('nama_barang');
       $barang->harga = $request->input('harga');
       $barang->harga_jual = $request->input('harga_jual');
+      $barang->harga_grosir = $request->input('harga_grosir');
       $barang->stok = $request->input('stok');
       $barang->opsi_tukarpoin = $stringOpsiTukarBarang;
 
       if (!$request->input('harga_khusus') == "") {
         $barang->harga_khusus = $request->input('harga_khusus');
-      }
-
-      if (!$request->input('bobot_poin') == "") {
-        $barang->bobot_poin = $request->input('bobot_poin');
       }
 
       $barang->save();
@@ -154,14 +166,6 @@ class BarangController extends Controller
 
       $id = $request->input('id');
 
-      $bobot_poin = null;
-
-      if ($request->input('bobot_poin')  == '') {
-        $bobot_poin = null;
-      } else {
-        $bobot_poin = $request->input('bobot_poin');
-      }
-
       $harga_khusus = null;
 
       if ($request->input('harga_khusus')  == '') {
@@ -175,7 +179,8 @@ class BarangController extends Controller
         'stok'      => 'required|integer',
         'harga'     => 'required|integer',
         'harga_jual'  => 'required|integer',
-        'harga_khusus' => 'integer'
+        'harga_khusus' => 'integer',
+        'harga_grosir' => 'required|integer'
       ];
 
       $messages = [
@@ -187,6 +192,8 @@ class BarangController extends Controller
         'harga_jual.required' => 'Harga jual harus diisi',
         'harga_jual.integer' => 'Harga jual harus berupa nominal (angka)',
         'harga_khusus.integer' => 'Harga harus berupa nominal (angka)',
+        'harga_grosir.required' => 'Harga grosir harus diisi',
+        'harga_grosir.integer' => 'Harga grosir harus berupa angka'
       ];
 
       $this->validate($request, $rules, $messages);
@@ -196,8 +203,8 @@ class BarangController extends Controller
       $barang->harga = $request->input('harga');
       $barang->harga_jual = $request->input('harga_jual');
       $barang->harga_khusus = $harga_khusus;
+      $barang->harga_grosir = $request->input('harga_grosir');
       $barang->stok = $request->input('stok');
-      $barang->bobot_poin = $bobot_poin;
       $barang->opsi_tukarpoin = $request->input('opsi_tukarpoin');
       $barang->save();
 
@@ -233,6 +240,7 @@ class BarangController extends Controller
       $barangMasuk->user_id = $request->input('user_id');
       $barangMasuk->barang_id = $request->input('id');
       $barangMasuk->stok_masuk = $request->input('stok_tambahan');
+      $barangMasuk->detail = 'Update Stok';
       $barangMasuk->save();
 
       if ($barang) {

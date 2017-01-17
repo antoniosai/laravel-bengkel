@@ -5,9 +5,6 @@
 @endsection
 
 @section('content')
-@include('partials.navbar')
-@include('partials.alert')
-@include('partials.warning')
 
 <div class="row">
   <div class="col-md-12">
@@ -18,8 +15,8 @@
       </div>
     </h3>
     <h4>
-      <span class="label label-success">MODAL : Rp {{ number_format($laba_rugi->modal) }}</span>
       <span class="label label-info">OMSET : Rp {{ number_format($laba_rugi->omset) }}</span>
+      <span class="label label-success">MODAL : Rp {{ number_format($laba_rugi->modal) }}</span>
       <span class="label label-warning">LABA : Rp {{ number_format($laba_rugi->laba) }}</span>
     </h4>
     <hr>
@@ -42,7 +39,7 @@
           $modal = 0;
           $laba = 0;
         ?>
-        @forelse($penjualan as $tranksaksi)
+        @foreach($penjualan as $tranksaksi)
         <tr>
           <td><center>{{ App\Http\Controllers\LibraryController::timestampsToHour($tranksaksi->created_at) }} WIB</center></td>
           <td><center><a href="{{ route('nota.detail', $tranksaksi->nota_id) }}">{{ $tranksaksi->nota_id }}</a></center></td>
@@ -58,11 +55,7 @@
           $laba = $laba + $tranksaksi->laba;
 
         ?>
-        @empty
-        <tr>
-          <td colspan="7"><center><h3>Tidak Ada Data</h3></center></td>
-        </tr>
-        @endforelse
+        @endforeach
         <tfoot>
           <tr class="info">
             <td colspan="4"><center><strong>Total</strong></center></td>

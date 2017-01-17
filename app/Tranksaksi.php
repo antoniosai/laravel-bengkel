@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Tranksaksi extends Model
 {
+    protected $fillable = ['user_id', 'nota_id', 'barang_id', 'qty', 'harga_asli', 'harga_pokok', 'harga_umum', 'total',  'status'];
+
     public function barang()
     {
       return $this->belongsTo('App\Barang');

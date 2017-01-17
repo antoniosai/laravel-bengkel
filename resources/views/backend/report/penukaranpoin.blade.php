@@ -9,7 +9,6 @@ Laporan Member
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <?php 
   $stringHeader = "Laporan Penukaran Poin" 
 ?>
@@ -31,10 +30,10 @@ Laporan Member
 
 <div class="well">
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-5">
       <h3>{{ $stringHeader }} <small><a href="#" title="Laporan Laba Rugi" data-toggle="popover" data-trigger="focus" data-content="Halaman untuk menampilkan laporan laba rugi (bulanan)"><i class="fa fa-question-circle fa-lg"></i></a></small></h3>
     </div>
-    <div class="col-md-6" style="margin-top: 10px">
+    <div class="col-md-7" style="margin-top: 10px">
       <div class="pull-right">
         <form class="form-inline pull-right" action="{{ action('ReportController@postPenukaranPoin')}}" method="post">
           {{ csrf_field() }}
@@ -57,9 +56,10 @@ Laporan Member
                 <option value="{{ $value }}" {{ $option }}>{{ $value }}</option>
               @endforeach
             </select>
-            <button type="submit" class="btn btn-success" name="report" value="filter">Filter</button>
-            <a href="{{ action('ReportController@penukaranPoin')}}" class="btn btn-info">Hapus Filter</a>
-            <button type="submit" class="btn btn-primary" name="report" value="export">Cetak PDF</button>
+
+            <button type="submit" class="btn btn-success" name="report" value="filter"><i class="fa fa-filter fa-lg"></i> Filter</button>
+            <a href="{{ action('ReportController@penukaranPoin')}}" class="btn btn-warning"><i class="fa fa-times fa-lg"></i> Hapus Filter</a>
+            <button type="submit" class="btn btn-primary" name="report" value="export"><i class="fa fa-file-pdf-o fa-lg"></i> Cetak PDF</button>
           </form>
       </div>
     </div>
@@ -69,7 +69,7 @@ Laporan Member
 <div class="row">
   <div class="col-md-12">
     <br>
-    <table class="table table-hover table-striped table-bordered" id="poin">
+    <table class="table table-hover table-striped" id="poin">
       <thead>
         <tr class="info">
           <th style="width: 20%"><center>Tanggal Penukaran</center></th>

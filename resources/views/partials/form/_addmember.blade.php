@@ -23,6 +23,11 @@
             <label>Alamat</label>
             <textarea name="alamat" rows="3" cols="40" class="form-control" placeholder="Alamat Member"></textarea>
           </div>
+          <div class="form-group">
+            <label>Tipe Member</label><br>
+            <input type="radio" name="type_member" value="regular"> Regular
+            <input type="radio" name="type_member" value="grosir" checked="checked"> Grosir
+          </div>
           <div class="form-group clearfix">
             <button type="submit" class="btn btn-info pull-right">Tambah Member</button>
           </div>

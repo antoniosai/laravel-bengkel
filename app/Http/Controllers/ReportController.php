@@ -59,7 +59,7 @@ class ReportController extends Controller
       ";
 
       $queryTukarPoin = "
-        SELECT hadiahs.nama_barang, members.nama_member, users.name, tukar_poins.created_at
+        SELECT hadiahs.nama_barang, members.nama_member, users.name, tukar_poins.created_at, tukar_poins.poin
         FROM hadiahs, members, users, tukar_poins
         WHERE tukar_poins.barang_id = hadiahs.id
         AND tukar_poins.member_id = members.id
@@ -100,6 +100,7 @@ class ReportController extends Controller
         'listTahun' => $this->listTahun,
         'laba_rugi' => $labaRugi
       ]);
+
     }
 
     public function labaRugiByDate($bulan = null, $tahun = null)
@@ -197,6 +198,62 @@ class ReportController extends Controller
       
     }
 
+    public function returns($bulan = null, $tahun = null)
+    {
+      $query = "
+        SELECT members.nama_member, users.name, returns.qty, returns.alasan, returns.created_at, barangs.nama_barang
+        FROM users, members, returns, barangs
+        WHERE returns.barang_id = barangs.id
+        AND returns.member_id = members.id
+        AND returns.user_id = users.id
+      ";
+
+      if ($bulan) {
+        $query .= "
+          AND month(returns.created_at) = $bulan
+        ";
+      }
+
+      if ($tahun) {
+        $query .= "
+          AND year(returns.created_at) = $tahun
+        ";
+      }
+
+      $query .= 'ORDER BY returns.created_at DESC';
+
+      $returns = DB::select(DB::raw($query));
+
+      return view('backend.report.return', [
+        'returns' => $returns,
+        'listBulan' => $this->listBulan,
+        'listTahun' => $this->listTahun,
+        'bulan' => $bulan,
+        'tahun' => $tahun,
+      ]);
+    }
+
+    public function returnsByDate($bulan, $tahun)
+    {
+      return $this->returns($bulan, $tahun);
+    }
+
+    public function postReturns(Request $request)
+    {
+      $bulan = $request->input('bulan');
+      $tahun = $request->input('tahun');
+
+      switch ($request->input('report')) {
+        case 'filter':
+          return $this->returnsByDate($bulan, $tahun);
+        break;
+
+        case 'export':
+          return Export::returnsToPdf($bulan, $tahun);
+        break;
+      }
+    }
+
     public function sales($bulan = null, $tahun = null)
     {
 
@@ -238,10 +295,12 @@ class ReportController extends Controller
 
     public function postSales(Request $request)
     {
+      // return $request->all();
+
       $bulan = $request->input('bulan');
       $tahun = $request->input('tahun');
 
-      switch ($request->input('button')) {
+      switch ($request->input('report')) {
         case 'filter':
           return $this->salesByDate($bulan, $tahun);
         break;
@@ -259,11 +318,36 @@ class ReportController extends Controller
       $tanggal = [];
 
       $barangMasukQuery = "
-        SELECT barangs.nama_barang, barang_masuks.stok_masuk, barang_masuks.created_at
-        FROM barangs, barang_masuks
-        ORDER BY barang_masuks.created_at DESC
+        SELECT barangs.nama_barang, barang_masuks.stok_masuk, barang_masuks.detail, barang_masuks.created_at
+        FROM barangs, barang_masuks, users
+        WHERE barang_masuks.barang_id = barangs.id
+        AND barang_masuks.user_id = users.id
       ";
 
+      $barangEloquent = Barang::all();
+
+      $barangKeluarQuery = "
+        SELECT barangs.nama_barang, members.nama_member, barang_keluars.stok_keluar, barang_keluars.tranksaksi ,barang_keluars.created_at
+        FROM barangs, barang_keluars, members, users
+        WHERE barang_keluars.barang_id = barangs.id
+        AND barang_keluars.member_id = members.id
+        AND barang_keluars.user_id = users.id
+      ";
+
+      if ($bulan) {
+        $barangKeluarQuery .= " AND month(barang_keluars.created_at) = $bulan";
+        $barangMasukQuery .= " AND month(barang_masuks.created_at) = $bulan";
+      }
+
+      if ($tahun) {
+        $barangKeluarQuery .= " AND year(barang_keluars.created_at) = $tahun";
+        $barangMasukQuery .= " AND year(barang_masuks.created_at) = $tahun";
+      }
+
+      $barangKeluarQuery .= ' ORDER BY barang_keluars.created_at DESC';
+      $barangMasukQuery .= ' ORDER BY barang_masuks.created_at DESC';
+
+      $barangKeluar = DB::select(DB::raw($barangKeluarQuery));
       $barangMasuks = DB::select(DB::raw($barangMasukQuery));
 
       foreach ($barangMasuks as $barangs) {
@@ -272,45 +356,46 @@ class ReportController extends Controller
         array_push($tanggal, $barangs->created_at);
       }
 
-      $barangEloquent = Barang::all();
-
-      $barangKeluarQuery = "
-        SELECT barangs.nama_barang, members.nama_member, barang_keluars.stok_keluar, barang_keluars.tranksaksi ,barang_keluars.created_at
-        FROM barangs, barang_keluars, members
-        WHERE barang_keluars.barang_id = barangs.id
-        AND barang_keluars.member_id = members.id
-      ";
-
-      if ($bulan) {
-        $barangKeluarQuery .= "
-          AND month(barang_keluars.created_at) = $bulan
-        ";
-      }
-
-      if ($tahun) {
-        $barangKeluarQuery .= "
-          AND year(barang_keluars.created_at) = $tahun
-        ";
-      }
-
-      $barangKeluarQuery .= 'ORDER BY barang_keluars.created_at DESC';
-
-      // return $barangKeluarQuery;
-
-      $barangKeluar = DB::select(DB::raw($barangKeluarQuery));
-
       return view('backend.report.barang',[
         'barangMasuk' => $barangMasuks,
         'barangKeluar' => $barangKeluar,
         'barang' => $barang,
         'tanggal' => $tanggal,
-        'barang_eloquent' => $barangEloquent
+        'barang_eloquent' => $barangEloquent,
+        'listBulan' => $this->listBulan,
+        'listTahun' => $this->listTahun,
+        'bulan' => $bulan,
+        'tahun' => $tahun
       ]);
     }
 
     public function barangByDate($bulan, $tahun)
     {
       return $this->barang($bulan, $tahun);
+    }
+
+    public function postFilterBarang(Request $request)
+    {
+
+      $bulan = $request->input('bulan');
+      $tahun = $request->input('tahun');
+
+      switch ($request->input('report')) {
+        case 'filter':
+          return $this->barangByDate($bulan, $tahun);
+        break;
+
+        case 'export':
+          if ($request->input('barang') == 'masuk') {
+            return Export::barangMasukToPdf($bulan, $tahun);
+          }
+          if ($request->input('barang') == 'keluar') {
+            return Export::barangKeluarToPdf($bulan, $tahun);
+          }
+        break;
+      }
+
+      
     }
 
     public function user()
@@ -346,7 +431,7 @@ class ReportController extends Controller
       ";
 
       $queryBarangMasuk = "
-        SELECT users.name, barangs.nama_barang, barang_masuks.stok_masuk, barang_masuks.created_at
+        SELECT users.name, barangs.nama_barang, barang_masuks.detail, barang_masuks.stok_masuk, barang_masuks.created_at
         FROM users, barang_masuks, barangs
         WHERE barang_masuks.user_id = users.id
         AND barang_masuks.barang_id = barangs.id

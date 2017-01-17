@@ -50,6 +50,38 @@ class BonusController extends Controller
       };
     }
 
+    public function postEditHadiah(Request $request)
+    {
+      $messages = [
+        'nama_barang.required' => 'Nama barang harus diisi',
+        'bobot_poin.required' => 'Bobot poin harus diisi',
+        'bobot_poin.integer' => 'Bobot poin harus berupa angka',
+        'stok.required' => 'Stok harus diisi',
+        'stok.integer' => 'Stok harus berupa angka'
+      ];
+
+      $rules = [
+        'nama_barang' => 'required',
+        'bobot_poin' => 'required|integer',
+        'stok' => 'required|integer'
+      ];
+
+      $this->validate($request, $rules, $messages);
+
+      $id = $request->input('id');
+
+      $diskon = Hadiah::findOrFail($id);
+      $diskon->nama_barang = $request->input('nama_barang');
+      $diskon->bobot_poin = $request->input('bobot_poin');
+      $diskon->stok = $request->input('stok');
+      $diskon->save();
+
+      if ($diskon) {
+        $request->session()->flash('alert-success', 'Berhasil mengupdat barang');
+        return redirect()->back();
+      };
+    }
+
     public function postAddPoin(Request $request)
     {
       $rules = [
@@ -139,6 +171,20 @@ class BonusController extends Controller
 
       if ($poin) {
         return redirect()->back()->with('successMessage', 'Poin berhasil dihapus');
+      }
+
+    }
+
+    public function deleteHadiah($id)
+    {
+      $barang = Hadiah::findOrFail($id);
+
+      try {
+         if ($barang->delete()) {
+          return redirect()->back()->with('successMessage', 'Barang berhasil dihapus');
+        }
+      } catch (\Illuminate\Database\QueryException $e) {
+        return redirect()->back()->with('errorMessage', 'Barang '.$barang->nama_barang.' tidak bisa dihapus karena sedang ada di dalam daftar Order');
       }
 
     }

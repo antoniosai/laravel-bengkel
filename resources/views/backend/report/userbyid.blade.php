@@ -9,8 +9,6 @@ Laporan Member
 @endsection
 
 @section('content')
-@include('partials.navbar')
-@include('partials.alert')
 <div class="row">
   <div class="col-md-12">
       
@@ -24,7 +22,7 @@ Laporan Member
       <div class="tab-pane active" id="tranksaksi">
         <h4>Menampilkan Data Tranksaksi yang dilakukan oleh {{ $user->name }}</h4>
         <hr>
-        <table class="table table-hover table-bordered table-condensed" id="sales">
+        <table class="table table-hover table-condensed" id="sales">
           <thead>
             <tr class="info">
               <th style="width: 21%"><center>Tanggal</center></th>
@@ -53,7 +51,7 @@ Laporan Member
       <div class="tab-pane" id="penukaranpoin">
         <h4>Menampilkan Data Penukaran Poin yang dilakukan oleh {{ $user->name }}</h4>
         <hr>
-        <table class="table table-hover table-striped table-bordered" id="poin">
+        <table class="table table-hover table-striped" id="poin">
           <thead>
             <tr class="info">
               <th><center>Tanggal Penukaran</center></th>
@@ -80,12 +78,13 @@ Laporan Member
       <div class="tab-pane" id="barangmasuk">
         <h4>Menampilkan Data Barang Masuk yang dilakukan oleh {{ $user->name }}</h4>
         <hr>
-        <table class="table table-hover table-striped table-bordered" id="barang">
+        <table class="table table-hover table-striped" id="barang">
           <thead>
             <tr class="info">
-              <th><center>Tanggal Masuk</center></th>
+              <th style="width:220px"><center>Tanggal Masuk</center></th>
               <th><center>Barang</center></th>
-              <th><center>Stok Masuk</center></th>
+              <th style="width: 120px"><center>+Stok Masuk</center></th>
+              <th style="width: 120px"><center>Keterangan</center></th>
               <th><center>Operator</center></th>
             </tr>
           </thead>
@@ -95,6 +94,7 @@ Laporan Member
               <td><center>{{ App\Http\Controllers\LibraryController::waktuIndonesia($barang->created_at) }}</center></td>
               <td><center>{{ $barang->nama_barang }}</center></td>
               <td><center>{{ $barang->stok_masuk }}</center></td>
+              <td><center>{{ $barang->detail }}</center></td>
               <td><center>{{ $barang->name }}</center></td>
             </tr>
             @endforeach

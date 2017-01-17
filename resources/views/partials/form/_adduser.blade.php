@@ -41,20 +41,17 @@
             </div>
 
             <div class="form-group">
-              <label class="col-md-4 control-label">Hak Akses</label>
-              <div class="col-md-6">
-                <label for="">
-                  <input type="radio" name="vehicle" value="Bike" class="form-control">Administrator
-                </label>
-                <label for="">
-                  <input type="radio" name="vehicle" value="Bike" class="form-control">Administrator
-                </label>
-                <label for="">
-                  <input type="radio" name="vehicle" value="Bike" class="form-control">Administrator
-                </label>
-              </div>
+                <label class="col-md-4 control-label">Hak Akses</label>
+                <div class="col-md-6">
+                    <?php $permission = DB::select(DB::raw("SELECT name, display_name FROM permissions WHERE name NOT IN ( 'user' )")); ?>
+                    @foreach($permission as $akses)
+                      <input type="checkbox" name="hak_akses[]" value="{{ $akses->name }}"> {{ $akses->display_name }}
+                      <br>
+                    @endforeach
+                </div>
             </div>
 
+            <hr>
             <div class="form-group{{ $errors->has('email') ? ' has-error' : '' }}">
                 <label for="email" class="col-md-4 control-label">E-Mail Address</label>
 

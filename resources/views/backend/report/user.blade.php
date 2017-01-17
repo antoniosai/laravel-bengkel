@@ -9,7 +9,6 @@ Laporan Member
 @endsection
 
 @section('content')
-@include('partials.navbar')
 
 <div class="well">
   <h3>Laporan User <small><a href="#" title="Laporan Laba Rugi" data-toggle="popover" data-trigger="focus" data-content="Halaman untuk menampilkan laporan laba rugi (bulanan)"><i class="fa fa-question-circle fa-lg"></i></a></small></h3>
@@ -18,7 +17,7 @@ Laporan Member
 <div class="row">
   <div class="col-md-12">
     <br>
-    <table class="table table-hover table-striped table-bordered table-condensed" id="user">
+    <table class="table table-hover table-striped table-condensed" id="user">
       <thead>
         <tr class="info">
           <th style="width: 5%"><center>No</center></th>

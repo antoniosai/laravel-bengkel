@@ -5,15 +5,11 @@
 @endsection
 
 @section('content')
-@include('partials.navbar')
 <div class="well">
   <h3>Setting Diskon & Poin
   </h3>
 </div>
 
-@include('partials.alert')
-@include('partials.warning')
-@include('partials.validationmessage')
 <div class="row">
   <div class="col-md-6">
     <h3>Poin
@@ -22,7 +18,7 @@
       </div>
     </h3>
     <hr>
-    <table class="table table-striped table-bordered table-hover table-condensed">
+    <table class="table table-striped table-hover table-condensed">
       <thead>
         <tr class="info">
           <th><center>Level</center></th>
@@ -54,6 +50,11 @@
         @endif
       </tbody>
     </table>
+
+    <p>
+      <h4><small>*) Poin tambahan hanya berlaku pada member Reguler</small></h4>
+    </p>
+
   </div>
   <div class="col-md-6">
     <h3>
@@ -63,7 +64,7 @@
       </div>
     </h3>
     <hr>
-    <table class="table table-bordered table-striped table-condensed">
+    <table class="table table-striped table-condensed">
       <thead>
         <tr class="info">
           <th><center>No</center></th>
@@ -83,8 +84,8 @@
           <td><center>{{ $barangs->stok }}</center></td>
           <td>
             <center>
-              <a href="" class="btn btn-warning btn-xs"><span class="fa fa-pencil fa-lg"></span></a>
-              <a href="" class="btn btn-danger btn-xs"><span class="fa fa-trash fa-lg"></span></a>
+              <button type="button" class="btn btn-warning btn-xs" data-toggle="modal" data-target="#detailHadiah{{$barangs->id}}"><i class="fa fa-pencil fa-lg"></i></button>
+              <a href="{{ route('delete.hadiah', $barangs->id) }}" class="btn btn-danger btn-xs"><span class="fa fa-trash fa-lg"></span></a>
             </center>
           </td>
         </tr>
@@ -136,4 +137,46 @@
 </div>
 @endforeach
 <!-- End Modal Detail Poin-->
+
+
+@foreach($hadiah as $barang)
+<div class="modal fade" id="detailHadiah{{$barang->id}}" role="dialog">
+  <div class="modal-dialog">
+
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Edit Hadiah {{ $barang->nama_barang }}</h4>
+      </div>
+      <div class="modal-body">
+        <form action="{{ action('BonusController@postEditHadiah')}}" method="post">
+          {{ csrf_field() }}
+          <input type="hidden" name="id" value="{{ $barang->id }}">
+          <div class="form-group">
+            <label>Nama Barang</label>
+            <input type="text" name="nama_barang" placeholder="Masukan Nama Barang" value="{{ $barang->nama_barang }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Stok</label>
+            <input type="number" name="stok" placeholder="Masukan Stok Tersedia" value="{{ $barang->stok }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Bobot Poin</label>
+            <input type="number" name="bobot_poin" placeholder="Masukan Bobot Poin" value="{{ $barang->bobot_poin }}" class="form-control">
+          </div>
+          <div class="form-group">
+            <div class="clearfix">
+              <div class="pull-right">
+                <button type="submit" class="btn btn-info">Simpan Hadiah</button>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+
+  </div>
+</div>
+@endforeach
+
 @endsection
