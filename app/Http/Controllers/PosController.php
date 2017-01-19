@@ -695,10 +695,12 @@ class PosController extends Controller
     }
     //Selesai Memasukkan
 
-    $member = Member::findOrFail($member_id);
-    $member->poin = $member->poin + $request->input('poin');
-    $member->sisa_poin = $member->sisa_poin + $request->input('poin');
-    $member->save();
+
+    //Poin di matikan karena akan diakumulasi 
+    // $member = Member::findOrFail($member_id);
+    // $member->poin = $member->poin + $request->input('poin');
+    // $member->sisa_poin = $member->sisa_poin + $request->input('poin');
+    // $member->save();
 
     $this->hitungGrandTotal($request->input('diskon'), $request->input('grand_total'));
 

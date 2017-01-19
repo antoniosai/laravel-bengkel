@@ -326,27 +326,8 @@ Route::group(['prefix' => 'test'], function(){
     return $orders_this_month = App\Barang::where( DB::raw('MONTH(created_at)', '=', date('m') ))->get();
   });
 
-  Route::get('diskon/{belanja}', 'TestController@setDiskon');
 
-  Route::get('test/{id}', [
-    'as' => 'test.id',
-    'uses' => 'TestController@test'
-  ]);
+  Route::get('repeat-until', 'TestController@akumulasiPoin');
 
-
-  Route::get('repeat-until', function(){
-    date_default_timezone_set('Asia/Jakarta');
-
-    $script_tz = date_default_timezone_get();
-
-    if (strcmp($script_tz, ini_get('date.timezone'))){
-        echo 'Script timezone differs from ini-set timezone.';
-    } else {
-        echo 'Script timezone and ini-set timezone match.';
-    }
-    echo date('Y-m-d h:s:m');
-  });
-
-  Route::post('post-coba', 'TestController@cobaPost');
 });
 //=================== TEST AREA =====================//

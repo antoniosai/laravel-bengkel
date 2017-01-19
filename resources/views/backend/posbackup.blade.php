@@ -40,7 +40,16 @@ Point of Sales
           </h4>
         </div>
         <div class="col-md-5">
-          <h4><span class="label label-success">Tipe Member : {!! ucfirst($member->type_member) !!}</span></h4>
+          <h4><span class="label label-success">Tipe Member :
+            <?php $typeMember = ''; ?> 
+            @if($member->type_member == 'grosir')
+              <?php $typeMember = 'GR'; ?>
+              {!! $typeMember !!}
+            @else
+              <?php $typeMember = 'RG'; ?>
+              {!! $typeMember !!}
+            @endif
+          </span></h4>
           <form class="form-inline" action="{!! action('PosController@unsetMember') !!}" method="post">
                 {!! csrf_field() !!}
                 <input type="hidden" name="member_id" value="{!! $memberGuest->id !!}">
@@ -51,14 +60,6 @@ Point of Sales
                 </div>
               </form>
         </div>
-        <div class="col-md-1">
-          <div class="col-md-2">
-            @if($member->type_member != 'grosir')
-              <h5>Poin</h5>
-              <h4><strong>+{!! $poin !!}</strong></h4>
-            @endif
-          </div>
-        </div>
       </div>
       @else
       <h5>Pilih Member</h5>
@@ -67,16 +68,24 @@ Point of Sales
           <form  action="{!! action('PosController@applyMember') !!}" method="POST">
             {!! csrf_field() !!}
             <input type="hidden" name="nota" value="{!! $nota !!}">
-            <div class="col-md-8">
+            <div class="col-md-10">
               <select class="js-selectize" id="member_id" name="member_id">
                 <option value="" selected="selected"></option>
                 @foreach($member as $anggota)
+                <?php $typeMember = ''; ?> 
+                @if($anggota->type_member == 'grosir')
+                  <?php $typeMember = 'GR'; ?>
+                  {!! $typeMember !!}
+                @else
+                  <?php $typeMember = 'RG'; ?>
+                  {!! $typeMember !!}
+                @endif
                 <!-- <li><a href="#">{!! $anggota->nama_member !!}</a></li> -->
-                <option value="{!! $anggota->id !!}">{!! $anggota->nama_member !!} - {!! $anggota->no_member !!}</option>
+                <option value="{!! $anggota->id !!}">{!! $typeMember !!} - {!! $anggota->nama_member !!} - {!! $anggota->no_member !!}</option>
                 @endforeach
               </select>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-2">
               <button type="submit" class="btn btn-success btn-sm">Pilih</button>
             </div>
           </form>
@@ -195,7 +204,7 @@ Point of Sales
               <input type="hidden" name="barang_id" value="{!! $item->barang_id !!}">
               <input type="hidden" name="id" value="{!! $item->id !!}">
               <input type="hidden" name="nota" value="{!! $nota !!}">
-              <input v-model="qty" type="number" name="qty" value="{!! $item->qty !!}" style="width: 40px">
+              <input v-model="qty" type="number" name="qty"  value="{!! $item->qty !!}" style="width: 50px">
 
             </div>
           </td>
@@ -217,7 +226,7 @@ Point of Sales
     <tfoot>
       <tr class="info">
         <td colspan="3"><center><strong>Total</strong></center></td>
-        <td><center><strong>{!! number_format($total) !!}</strong></center></td>
+        <td><center><strong>Rp {!! number_format($total) !!}</strong></center></td>
         <td></td>
       </tr>
     </tfoot>
